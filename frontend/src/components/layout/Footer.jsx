@@ -34,7 +34,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 pb-16 border-b border-white/10">
         {/* Contact/Brand */}
         <div>
-          <span className="font-display font-extrabold text-2xl tracking-widest text-[#D4A853] block mb-4">RealEstate</span>
+          <span className="font-display font-semibold text-2xl tracking-widest text-[#D4A853] block mb-4">RealEstate</span>
           <p className="text-white/50 text-sm max-w-xs mb-6">
             India's most trusted platform for buying, selling, and renting verified real estate properties.
           </p>
@@ -66,11 +66,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Huge Brand Name */}
       <div className="max-w-7xl mx-auto mt-16 text-center">
-        <h2 className="text-[12vw] font-display font-black tracking-tighter leading-none text-white/5 select-none pointer-events-none">
-          RealEstate
-        </h2>
         
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 text-xs text-white/30 border-t border-white/5 pt-8">
           <p>© {new Date().getFullYear()} RealEstate Platform. All rights reserved.</p>

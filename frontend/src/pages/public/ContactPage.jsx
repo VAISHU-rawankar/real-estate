@@ -14,10 +14,10 @@ export default function ContactPage() {
         {/* Top Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="w-4 h-4 text-[#7C5CFF] font-extrabold">✦</span>
-            <span className="text-[#7C5CFF] text-[10px] font-extrabold tracking-wider uppercase">GET IN TOUCH</span>
+            <span className="w-4 h-4 text-[#7C5CFF] font-semibold">✦</span>
+            <span className="text-[#7C5CFF] text-[10px] font-semibold tracking-wider uppercase">GET IN TOUCH</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold tracking-tight mb-4 text-navy-900">
+          <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight mb-4 text-navy-900">
             Contact Our Advisors
           </h1>
           <p className="text-[#666666] text-xs font-semibold leading-relaxed">
@@ -29,7 +29,7 @@ export default function ContactPage() {
           {/* Left: Contact Info */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-8 bg-[#FAF8F5]/30 border border-[#EAE6DF] rounded-[32px] p-8 md:p-10">
             <div>
-              <h2 className="text-2xl font-display font-extrabold tracking-tight mb-6">Contact Channels</h2>
+              <h2 className="text-2xl font-display font-semibold tracking-tight mb-6">Contact Channels</h2>
               <div className="space-y-6">
                 {[
                   { icon: PhoneIcon, label: 'Speak to Experts', value: '+91 99999 88888', desc: 'Available Mon-Sat, 9AM - 7PM' },
@@ -41,7 +41,7 @@ export default function ContactPage() {
                       <item.icon className="w-5 h-5 text-[#7C5CFF]" />
                     </div>
                     <div>
-                      <p className="text-xs font-extrabold text-[#1A1A1A]">{item.label}</p>
+                      <p className="text-xs font-semibold text-[#1A1A1A]">{item.label}</p>
                       <p className="text-sm font-bold text-[#7C5CFF] mt-1">{item.value}</p>
                       <p className="text-[10px] text-gray-400 font-semibold mt-0.5">{item.desc}</p>
                     </div>
@@ -65,7 +65,7 @@ export default function ContactPage() {
 
           {/* Right: Lead Form */}
           <div className="lg:col-span-7 bg-[#1A1A1A] text-white rounded-[32px] p-8 md:p-10 flex flex-col justify-center shadow-xl border border-white/5">
-            <h2 className="text-2xl font-display font-extrabold tracking-tight mb-6">Send an Inquiry</h2>
+            <h2 className="text-2xl font-display font-semibold tracking-tight mb-6">Send an Inquiry</h2>
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="First Name" />

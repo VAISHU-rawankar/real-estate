@@ -3,11 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  HeartIcon, UserCircleIcon, Bars3Icon, XMarkIcon,
-  MagnifyingGlassIcon, ChevronDownIcon, BellIcon
+  HeartIcon, Bars3Icon, XMarkIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
-import { selectIsAuthenticated, selectCurrentUser, selectIsAdmin } from '@store/slices/authSlice';
+import { selectIsAuthenticated, selectCurrentUser, logout as authLogout } from '@store/slices/authSlice';
 import { selectShortlistCount } from '@store/slices/shortlistSlice';
 import { toggleMobileMenu, selectIsMobileMenuOpen } from '@store/slices/uiSlice';
 import { useLogoutMutation } from '@store/api/authApi';
@@ -24,7 +24,6 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
-  const isAdmin = useSelector(selectIsAdmin);
   const shortlistCount = useSelector(selectShortlistCount);
   const mobileMenuOpen = useSelector(selectIsMobileMenuOpen);
   const dispatch = useDispatch();
@@ -32,41 +31,42 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
 
-  const isHomePage = location.pathname === '/';
-
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const navBg = 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100';
-  const textColor = 'text-[#1A1A1A]';
-
   const handleLogout = async () => {
-    await logout();
-    setUserMenuOpen(false);
-    navigate('/');
+    try {
+      await logout().unwrap();
+    } catch (err) {
+      console.warn('Logout failed, forcing local cleanup');
+    } finally {
+      dispatch(authLogout());
+      setUserMenuOpen(false);
+      navigate('/');
+    }
   };
 
   return (
-    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${navBg}`} style={{ height: '72px' }}>
-      <div className="page-container h-full flex items-center justify-between gap-6">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-          <span className={`font-display font-extrabold text-xl tracking-wider transition-colors ${textColor}`}>RealEstate</span>
+    <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white border-b border-gray-100 ${scrolled ? 'shadow-sm' : ''}`} style={{ height: '80px' }}>
+      <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-12 flex items-center justify-between">
+        {/* Left: Logo */}
+        <Link to="/" className="flex items-center flex-shrink-0">
+          <span className="text-[24px] font-extrabold tracking-tight text-[#111111]">RealEstate</span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-1">
+        {/* Center: Nav Links */}
+        <nav className="hidden lg:flex items-center gap-10">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`text-[15px] font-medium transition-colors ${
                 location.pathname.startsWith(link.href)
-                  ? 'text-[#8C6D45] font-semibold'
-                  : `${textColor} hover:text-[#8C6D45]`
+                  ? 'text-[#111111] font-bold'
+                  : 'text-[#555555] hover:text-[#111111]'
               }`}
             >
               {link.label}
@@ -74,20 +74,12 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          {/* Search icon (mobile) */}
-          <button
-            onClick={() => navigate('/properties')}
-            className={`p-2 rounded-lg transition-colors lg:hidden ${textColor} hover:text-gold-500`}
-          >
-            <MagnifyingGlassIcon className="w-5 h-5" />
-          </button>
-
-          {/* Shortlist */}
+        {/* Right: Actions */}
+        <div className="flex items-center gap-6">
+          {/* Wishlist */}
           <Link
             to={isAuthenticated ? '/dashboard/shortlist' : '/auth/login'}
-            className={`relative p-2 rounded-lg transition-colors ${textColor} hover:text-gold-500`}
+            className="text-[#111111] hover:scale-110 transition-transform relative hidden sm:block"
           >
             {shortlistCount > 0 ? (
               <HeartSolid className="w-5 h-5 text-red-500" />
@@ -95,86 +87,81 @@ export default function Navbar() {
               <HeartIcon className="w-5 h-5" />
             )}
             {shortlistCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold px-0.5">
-                {shortlistCount}
-              </span>
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full" />
             )}
           </Link>
 
-          {isAuthenticated ? (
-            <>
-              {isAdmin && (
-                <Link to="/admin" className="hidden lg:flex btn-sm btn-navy text-sm px-4 py-2">
-                  Admin
-                </Link>
-              )}
-              {/* User dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen((p) => !p)}
-                  className={`flex items-center gap-2 ${textColor} hover:text-gold-500 transition-colors`}
-                >
-                  <div className="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{user?.name?.[0] || 'U'}</span>
-                  </div>
-                  <ChevronDownIcon className="w-4 h-4 hidden sm:block" />
-                </button>
-                <AnimatePresence>
-                  {userMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-card-hover border border-slate-100 overflow-hidden z-50"
-                    >
-                      <div className="px-4 py-3 border-b border-slate-100">
-                        <p className="text-sm font-semibold text-navy-900 truncate">{user?.name}</p>
-                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
-                      </div>
-                      {[
-                        { label: 'Dashboard', href: '/dashboard' },
-                        { label: 'Shortlist', href: '/dashboard/shortlist' },
-                        { label: 'Enquiries', href: '/dashboard/enquiries' },
-                        { label: 'Profile', href: '/dashboard/profile' },
-                      ].map((item) => (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          onClick={() => setUserMenuOpen(false)}
-                          className="block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-navy-900 transition-colors"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-slate-100"
-                      >
-                        Logout
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </>
-          ) : (
-            <div className="hidden sm:flex items-center gap-4">
-              <Link to="/auth/login" className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${textColor} hover:text-[#8C6D45]`}>
-                Sign In
-              </Link>
-              <Link to="/contact" className="bg-[#1A1A1A] text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-[#2A2A2A] transition-colors shadow-sm">
-                Contact Us
-              </Link>
-            </div>
+          {!isAuthenticated && (
+            <Link
+              to="/auth/login"
+              className="hidden sm:block text-[14px] font-medium text-[#555555] hover:text-[#111111] transition-colors"
+            >
+              Sign In
+            </Link>
           )}
 
-          {/* Mobile hamburger */}
+          <Link
+            to="/contact"
+            className="hidden sm:flex items-center px-5 py-2 bg-[#111111] text-white text-[13px] font-semibold rounded-full hover:bg-black transition-colors"
+          >
+            Contact Us
+          </Link>
+
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen((p) => !p)}
+                className="flex items-center gap-2 text-[#111111] hover:opacity-80 transition-opacity"
+              >
+                <div className="w-9 h-9 rounded-full bg-[#111111] flex items-center justify-center">
+                  <span className="text-white font-bold text-sm uppercase">{user?.name?.[0] || 'U'}</span>
+                </div>
+                <ChevronDownIcon className="w-4 h-4 hidden sm:block" />
+              </button>
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 top-full mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                  >
+                    <div className="px-5 py-4 border-b border-gray-50">
+                      <p className="text-sm font-bold text-[#111111] truncate">{user?.name}</p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+                    </div>
+                    {[
+                      { label: 'Dashboard', href: '/dashboard' },
+                      { label: 'My Inquiries', href: '/dashboard/enquiries' },
+                      { label: 'Profile Settings', href: '/dashboard/profile' },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        to={item.href}
+                        onClick={() => setUserMenuOpen(false)}
+                        className="block px-5 py-3 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-[#111111] transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-5 py-3 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-colors border-t border-gray-50"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : null}
+
+          {/* Mobile toggle */}
           <button
             onClick={() => dispatch(toggleMobileMenu())}
-            className={`lg:hidden p-2 rounded-lg transition-colors ${textColor}`}
+            className="lg:hidden text-[#111111] p-2"
           >
-            {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+            {mobileMenuOpen ? <XMarkIcon className="w-7 h-7" /> : <Bars3Icon className="w-7 h-7" />}
           </button>
         </div>
       </div>
@@ -183,34 +170,33 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="lg:hidden bg-white border-t border-slate-100 shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="lg:hidden absolute top-full inset-x-0 bg-white border-t border-gray-100 shadow-2xl overflow-hidden p-8 space-y-8"
           >
-            <div className="page-container py-4 space-y-1">
+            <div className="flex flex-col gap-6">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   onClick={() => dispatch(toggleMobileMenu())}
-                  className="block px-4 py-3 rounded-xl text-navy-900 font-medium hover:bg-slate-50 transition-colors"
+                  className="text-xl font-bold text-[#111111]"
                 >
                   {link.label}
                 </Link>
               ))}
-              {!isAuthenticated && (
-                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                  <Link to="/auth/login" onClick={() => dispatch(toggleMobileMenu())} className="block text-center py-3 text-navy-900 font-medium rounded-xl border border-slate-200">
-                    Sign In
-                  </Link>
-                  <Link to="/auth/register" onClick={() => dispatch(toggleMobileMenu())} className="block text-center py-3 text-white font-semibold rounded-xl" style={{ background: 'linear-gradient(135deg, #D4A853, #E8B84B)' }}>
-                    Get Started
-                  </Link>
-                </div>
-              )}
             </div>
+            {!isAuthenticated && (
+              <div className="pt-8 border-t border-gray-100 flex flex-col gap-4">
+                <Link to="/auth/login" onClick={() => dispatch(toggleMobileMenu())} className="text-center py-4 text-[#111111] font-bold rounded-2xl border border-gray-200">
+                  Sign In
+                </Link>
+                <Link to="/contact" onClick={() => dispatch(toggleMobileMenu())} className="text-center py-4 bg-[#111111] text-white font-bold rounded-2xl">
+                  Contact Us
+                </Link>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

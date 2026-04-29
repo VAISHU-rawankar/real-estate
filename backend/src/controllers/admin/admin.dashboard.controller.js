@@ -5,18 +5,26 @@ const { sendSuccess } = require('../../utils/apiResponse');
 const propertyService = require('../../services/property.service');
 const leadService = require('../../services/lead.service');
 const Lead = require('../../models/Lead.model');
+const User = require('../../models/User.model');
 const ActivityLog = require('../../models/ActivityLog.model');
 
 /**
  * GET /api/v1/admin/dashboard/stats
  */
 const getDashboardStats = asyncHandler(async (req, res) => {
-  const [propertyStats, leadStats] = await Promise.all([
-    propertyService.getDashboardStats(),
-    getLeadStats(),
-  ]);
+  try {
+    const [propertyStats, leadStats, userCount] = await Promise.all([
+      propertyService.getDashboardStats(),
+      getLeadStats(),
+      User.countDocuments(),
+    ]);
 
-  sendSuccess(res, { data: { properties: propertyStats, leads: leadStats } });
+    sendSuccess(res, { data: { properties: propertyStats, leads: leadStats, users: { total: userCount } } });
+  } catch (err) {
+    const fs = require('fs');
+    fs.appendFileSync('dashboard_error.log', `[${new Date().toISOString()}] ERROR: ${err.message}\n${err.stack}\n`);
+    throw err;
+  }
 });
 
 async function getLeadStats() {

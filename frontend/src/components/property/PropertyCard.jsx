@@ -81,7 +81,7 @@ export default function PropertyCard({ property, index = 0 }) {
           {/* Content */}
           <div className="p-6">
             <div className="flex justify-between items-start gap-2 mb-2">
-              <span className="text-xl font-display font-bold text-[#1A1A1A]">
+              <span className="text-xl font-display font-semibold text-[#1A1A1A]">
                 {property.formattedPrice || formatPrice(property.price)}
               </span>
               {property.listingType === 'rent' && (

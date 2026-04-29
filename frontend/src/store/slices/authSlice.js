@@ -2,16 +2,16 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const SESSION_KEY = 'rp_session';
 
-function loadFromSession() {
+function loadFromStorage() {
   try {
-    const data = sessionStorage.getItem(SESSION_KEY);
+    const data = localStorage.getItem(SESSION_KEY);
     return data ? JSON.parse(data) : null;
   } catch {
     return null;
   }
 }
 
-const saved = loadFromSession();
+const saved = loadFromStorage();
 
 const initialState = {
   user: saved?.user || null,
@@ -25,23 +25,23 @@ const authSlice = createSlice({
   reducers: {
     setCredentials(state, action) {
       const { user, accessToken } = action.payload;
-      state.user = user;
-      state.accessToken = accessToken;
+      if (user !== undefined) state.user = user;
+      if (accessToken !== undefined) state.accessToken = accessToken;
       state.isAuthenticated = true;
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user, accessToken }));
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: state.user, accessToken: state.accessToken }));
     },
     updateUser(state, action) {
       state.user = { ...state.user, ...action.payload };
-      const saved = loadFromSession();
+      const saved = loadFromStorage();
       if (saved) {
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...saved, user: state.user }));
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ ...saved, user: state.user }));
       }
     },
     logout(state) {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
     },
   },
 });

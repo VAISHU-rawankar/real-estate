@@ -24,7 +24,7 @@ export default function ComparePage() {
           <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Listings
         </Link>
 
-        <h1 className="text-3xl font-display font-extrabold tracking-tight mb-12">Compare Properties</h1>
+        <h1 className="text-3xl font-display font-semibold tracking-tight mb-12">Compare Properties</h1>
 
         {isLoading ? (
           <p className="text-gray-400 text-sm font-semibold">Loading parameters...</p>
@@ -40,7 +40,7 @@ export default function ComparePage() {
             <table className="w-full text-left border-collapse border border-[#EAE6DF] rounded-[32px] overflow-hidden">
               <thead>
                 <tr className="bg-[#FAF8F5]">
-                  <th className="p-6 border border-[#EAE6DF] text-xs font-extrabold text-[#1A1A1A]">Features</th>
+                  <th className="p-6 border border-[#EAE6DF] text-xs font-semibold text-[#1A1A1A]">Features</th>
                   {comparedProperties.map(p => (
                     <th key={p._id} className="p-6 border border-[#EAE6DF] text-center min-w-[220px]">
                       <div className="flex flex-col items-center">
@@ -49,7 +49,7 @@ export default function ComparePage() {
                           alt="" 
                           className="w-32 h-24 object-cover rounded-xl border border-[#EAE6DF] mb-4 shadow-sm"
                         />
-                        <span className="block text-sm font-extrabold text-[#1A1A1A] max-w-[200px] truncate">{p.title}</span>
+                        <span className="block text-sm font-semibold text-[#1A1A1A] max-w-[200px] truncate">{p.title}</span>
                         <span className="block text-xs font-bold text-[#7C5CFF] mt-1">₹{p.price?.toLocaleString('en-IN')}</span>
                       </div>
                     </th>

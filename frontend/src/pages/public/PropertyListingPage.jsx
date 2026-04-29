@@ -64,10 +64,10 @@ export default function PropertyListingPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-4 h-4 text-[#7C5CFF] font-extrabold">✦</span>
-              <span className="text-[#7C5CFF] text-[10px] font-extrabold tracking-wider uppercase">HANDPICKED LISTINGS</span>
+              <span className="w-4 h-4 text-[#7C5CFF] font-semibold">✦</span>
+              <span className="text-[#7C5CFF] text-[10px] font-semibold tracking-wider uppercase">HANDPICKED LISTINGS</span>
             </div>
-            <h1 className="text-3xl sm:text-[44px] font-display font-extrabold text-[#1A1A1A] leading-[1.1]">
+            <h1 className="text-3xl sm:text-[44px] font-display font-semibold text-[#1A1A1A] leading-[1.1]">
               Explore Apartments and <br /> Homes for Sale
             </h1>
             <p className="text-gray-400 text-xs font-semibold mt-2">Discover premium properties in the best locations.</p>

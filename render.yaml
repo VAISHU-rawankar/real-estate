@@ -1,0 +1,60 @@
+services:
+  # --- Backend API (Node.js) ---
+  - type: web
+    name: realestate-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: realestate-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: realestate-cache
+          property: connectionString
+      - key: CLIENT_URL
+        sync: false # Set this to your Vercel URL after deployment
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+  # --- Frontend (Static Site) ---
+  # Note: You can also use Vercel for the frontend
+  - type: web
+    name: realestate-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishDir: dist
+    routes:
+      - type: rewrite
+        src: /*
+        dest: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: realestate-backend
+          property: host
+
+# --- Add-ons ---
+databases:
+  - name: realestate-db
+    plan: free
+
+# Note: Redis on Render is a paid feature in some regions.
+# If on a free tier, you might want to use a free Redis from Upstash instead.
+# For now, we define it here for completeness.
+# redis:
+#   name: realestate-cache
+#   plan: free
+#   ipAllowList: [] # Only allow internal connections

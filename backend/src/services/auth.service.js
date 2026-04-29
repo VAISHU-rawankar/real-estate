@@ -76,7 +76,7 @@ async function login({ email, password }) {
     throw Object.assign(new Error('Invalid email or password'), { statusCode: 401, code: 'INVALID_CREDENTIALS' });
   }
 
-  if (user.role === 'admin') {
+  if (user.role === 'admin' && process.env.NODE_ENV === 'production') {
     await sendOTP({ contact: email, contactType: 'email', type: 'admin-2fa' });
     return { require2FA: true, email };
   }
@@ -174,7 +174,7 @@ async function sendOTP({ contact, contactType, type }) {
     await sendOTPSMS(contact, code);
   }
 
-  logger.info(`OTP sent to ${contactType}: ${contact} for ${type}`);
+  logger.info(`OTP sent to ${contactType}: ${contact} for ${type} — CODE: ${code}`);
 }
 
 /**

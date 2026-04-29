@@ -51,22 +51,22 @@ export default function AdminProperties() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-display font-bold text-navy-900">Properties</h1>
-            <p className="text-slate-400 text-sm">{data?.meta?.total || 0} total listings</p>
+            <h1 className="text-4xl font-display font-semibold text-[#1A1A1A] uppercase tracking-tight">Properties</h1>
+            <p className="text-[#666666] text-[10px] font-bold uppercase tracking-widest mt-2">{data?.meta?.total || 0} Total Listings</p>
           </div>
-          <Link to="/admin/properties/create" className="btn-primary btn-md">+ New Property</Link>
+          <Link to="/admin/properties/create" className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-full transition-colors shadow-sm">+ New Property</Link>
         </div>
 
-        <div className="card overflow-hidden">
+        <div className="bg-white border border-[#EAE6DF] rounded-[24px] overflow-hidden shadow-sm">
           {isLoading ? (
             <div className="p-8 text-center text-slate-400">Loading properties...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-[#FAF8F5] border-b border-[#EAE6DF]">
                   <tr>
                     {['Property', 'Price', 'Location', 'Type', 'Status', 'Views', 'Actions'].map((h) => (
-                      <th key={h} className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3.5">{h}</th>
+                      <th key={h} className="text-left text-[10px] font-bold text-[#666666] uppercase tracking-widest px-6 py-4">{h}</th>
                     ))}
                   </tr>
                 </thead>

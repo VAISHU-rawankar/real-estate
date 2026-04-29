@@ -13,6 +13,8 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const fs = require('fs');
+    fs.appendFileSync('auth_debug.log', `[${new Date().toISOString()}] 401: Missing or malformed auth header\n`);
     return sendError(res, { status: 401, message: 'Authentication required', code: 'UNAUTHORIZED' });
   }
 
@@ -23,6 +25,8 @@ const requireAuth = asyncHandler(async (req, res, next) => {
     decoded = verifyAccessToken(token);
   } catch (err) {
     const isExpired = err.name === 'TokenExpiredError';
+    const fs = require('fs');
+    fs.appendFileSync('auth_debug.log', `[${new Date().toISOString()}] 401: ${isExpired ? 'Expired' : 'Invalid'} token\n`);
     return sendError(res, {
       status: 401,
       message: isExpired ? 'Token expired — please refresh' : 'Invalid token',
@@ -34,6 +38,8 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   const user = await User.findById(decoded.id).select('-passwordHash -refreshToken').lean();
 
   if (!user || !user.isActive) {
+    const fs = require('fs');
+    fs.appendFileSync('auth_debug.log', `[${new Date().toISOString()}] 401: User not found or inactive (${decoded.id})\n`);
     return sendError(res, { status: 401, message: 'Account not found or deactivated', code: 'UNAUTHORIZED' });
   }
 

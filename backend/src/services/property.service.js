@@ -323,15 +323,27 @@ async function toggleFeatured(propertyId) {
  * @returns {Promise<Object>}
  */
 async function getDashboardStats() {
-  const [statusCounts, featuredCount, allProperties] = await Promise.all([
+  const [statusCounts, featuredCount, allProperties, recentProperties, typeCounts, viewStats] = await Promise.all([
     Property.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]),
     Property.countDocuments({ isFeatured: true }),
     Property.find().select('images floorPlanImages').lean(),
+    Property.find().sort({ createdAt: -1 }).limit(5).select('title slug price location bhkConfig images status propertyType viewCount').lean(),
+    Property.aggregate([
+      { $group: { _id: '$propertyType', count: { $sum: 1 } } },
+    ]),
+    Property.aggregate([
+      { $group: { _id: null, totalViews: { $sum: '$viewCount' } } },
+    ]),
   ]);
 
   const stats = statusCounts.reduce((acc, item) => {
+    acc[item._id] = item.count;
+    return acc;
+  }, {});
+
+  const typeMap = typeCounts.reduce((acc, item) => {
     acc[item._id] = item.count;
     return acc;
   }, {});
@@ -343,8 +355,10 @@ async function getDashboardStats() {
   });
   const mediaStorageUsed = Math.max(0.01, (totalImages * 350 * 1024) / (1024 * 1024 * 1024));
 
+  const total = Object.values(stats).reduce((a, b) => a + b, 0);
+
   return {
-    total: Object.values(stats).reduce((a, b) => a + b, 0),
+    total,
     active: (stats.active || 0) + (stats.featured || 0),
     draft: stats.draft || 0,
     sold: stats.sold || 0,
@@ -352,6 +366,9 @@ async function getDashboardStats() {
     archived: stats.archived || 0,
     featured: featuredCount,
     mediaStorageUsed: parseFloat(mediaStorageUsed.toFixed(3)),
+    recent: recentProperties,
+    byType: typeMap,
+    totalViews: (viewStats && viewStats.length > 0) ? viewStats[0].totalViews : 0,
   };
 }
 

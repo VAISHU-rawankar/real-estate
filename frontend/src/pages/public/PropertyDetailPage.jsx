@@ -76,14 +76,14 @@ export default function PropertyDetailPage() {
             <div className="bg-[#FAF8F5]/30 border border-[#EAE6DF] rounded-[32px] p-6 md:p-10 text-[#1A1A1A]">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#EAE6DF] pb-6 mb-6">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-display font-extrabold tracking-tight">{property?.title}</h1>
+                  <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight">{property?.title}</h1>
                   <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-2 font-medium">
                     <MapPinIcon className="w-4 h-4" />
                     <span>{property?.location?.locality}, {property?.location?.city}, {property?.location?.state}</span>
                   </div>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-display font-extrabold text-[#7C5CFF]">{formatPrice(property?.price)}</span>
+                  <span className="text-3xl font-display font-semibold text-[#7C5CFF]">{formatPrice(property?.price)}</span>
                   {property?.listingType === 'rent' && <span className="text-xs text-gray-400 font-semibold">/ month</span>}
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function PropertyDetailPage() {
             {/* About / Description */}
             {property?.description && (
               <div className="space-y-4">
-                <h2 className="text-xl font-display font-extrabold text-[#1A1A1A] tracking-tight">About this Property</h2>
+                <h2 className="text-xl font-display font-semibold text-[#1A1A1A] tracking-tight">About this Property</h2>
                 <p className="text-[#666666] leading-relaxed text-sm font-medium">{property.description}</p>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function PropertyDetailPage() {
             {/* Amenities Section */}
             {property?.societyAmenities?.length > 0 && (
               <div className="space-y-4">
-                <h2 className="text-xl font-display font-extrabold text-[#1A1A1A] tracking-tight">Amenities</h2>
+                <h2 className="text-xl font-display font-semibold text-[#1A1A1A] tracking-tight">Amenities</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {property.societyAmenities.map((a) => (
                     <div key={a} className="flex items-center gap-2 border border-[#EAE6DF] rounded-2xl p-4 bg-white shadow-sm">
@@ -170,7 +170,7 @@ export default function PropertyDetailPage() {
 
             {/* Map Section */}
             <div className="space-y-4">
-              <h2 className="text-xl font-display font-extrabold text-[#1A1A1A] tracking-tight">Location & Landmarks</h2>
+              <h2 className="text-xl font-display font-semibold text-[#1A1A1A] tracking-tight">Location & Landmarks</h2>
               <div className="rounded-[32px] overflow-hidden border border-[#EAE6DF] h-[350px] relative">
                 <iframe 
                   title="Property Location View"
@@ -187,7 +187,7 @@ export default function PropertyDetailPage() {
           {/* Enquiry Sidebar */}
           <div className="lg:col-span-4">
             <div className="bg-[#1A1A1A] text-white p-6 md:p-8 rounded-[32px] sticky top-24 shadow-xl">
-              <h3 className="text-xl font-display font-extrabold tracking-tight mb-6">Enquire Now</h3>
+              <h3 className="text-xl font-display font-semibold tracking-tight mb-6">Enquire Now</h3>
               <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="Your Name" />
                 <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="Phone Number" type="tel" />
@@ -221,7 +221,7 @@ export default function PropertyDetailPage() {
 
               {property?.createdBy && (
                 <div className="mt-6 pt-6 border-t border-white/10 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#A855F7] flex items-center justify-center font-extrabold text-sm text-white">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C5CFF] to-[#A855F7] flex items-center justify-center font-semibold text-sm text-white">
                     {property.createdBy.name?.[0]}
                   </div>
                   <div>
@@ -237,7 +237,7 @@ export default function PropertyDetailPage() {
         {/* Related */}
         {related.length > 0 && (
           <div className="mt-20 border-t border-[#EAE6DF] pt-16">
-            <h2 className="text-2xl font-display font-extrabold text-[#1A1A1A] tracking-tight mb-8 uppercase">Similar Properties</h2>
+            <h2 className="text-2xl font-display font-semibold text-[#1A1A1A] tracking-tight mb-8 uppercase">Similar Properties</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {related.slice(0, 4).map((p, i) => <PropertyCard key={p._id} property={p} index={i} />)}
             </div>

@@ -13,10 +13,10 @@ export default function AboutPage() {
         {/* Top Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="w-4 h-4 text-[#7C5CFF] font-extrabold">✦</span>
-            <span className="text-[#7C5CFF] text-[10px] font-extrabold tracking-wider uppercase">OUR JOURNEY</span>
+            <span className="w-4 h-4 text-[#7C5CFF] font-semibold">✦</span>
+            <span className="text-[#7C5CFF] text-[10px] font-semibold tracking-wider uppercase">OUR JOURNEY</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-display font-extrabold tracking-tight mb-4 text-navy-900">
+          <h1 className="text-4xl md:text-5xl font-display font-semibold tracking-tight mb-4 text-navy-900">
             About Our Company
           </h1>
           <p className="text-[#666666] text-xs font-semibold leading-relaxed">
@@ -34,7 +34,7 @@ export default function AboutPage() {
             />
           </div>
           <div className="space-y-6">
-            <h2 className="text-2xl font-display font-extrabold tracking-tight">Our Mission & Vision</h2>
+            <h2 className="text-2xl font-display font-semibold tracking-tight">Our Mission & Vision</h2>
             <p className="text-[#666666] leading-relaxed text-sm font-medium">
               Founded with the explicit goal of establishing unmatched transparency within real estate markets, we serve as the vital link connecting elite architectural concepts with eager residents.
             </p>
@@ -43,11 +43,11 @@ export default function AboutPage() {
             </p>
             <div className="grid grid-cols-2 gap-6 pt-4">
               <div className="border border-[#EAE6DF] rounded-2xl p-6 bg-[#FAF8F5]/30">
-                <span className="block text-3xl font-display font-extrabold text-[#7C5CFF]">10K+</span>
+                <span className="block text-3xl font-display font-semibold text-[#7C5CFF]">10K+</span>
                 <span className="block text-xs font-bold mt-1 text-[#1A1A1A]">Active Listings</span>
               </div>
               <div className="border border-[#EAE6DF] rounded-2xl p-6 bg-[#FAF8F5]/30">
-                <span className="block text-3xl font-display font-extrabold text-[#7C5CFF]">50+</span>
+                <span className="block text-3xl font-display font-semibold text-[#7C5CFF]">50+</span>
                 <span className="block text-xs font-bold mt-1 text-[#1A1A1A]">Indian Cities</span>
               </div>
             </div>
@@ -56,7 +56,7 @@ export default function AboutPage() {
 
         {/* Team Section */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl font-display font-extrabold tracking-tight">Meet Our Experts</h2>
+          <h2 className="text-3xl font-display font-semibold tracking-tight">Meet Our Experts</h2>
           <p className="text-[#666666] text-xs font-semibold mt-2">Driven professionals navigating complex residential scopes.</p>
         </div>
 
@@ -71,7 +71,7 @@ export default function AboutPage() {
               <div className="w-48 h-48 rounded-full overflow-hidden border-2 border-[#EAE6DF] shadow-md transition-all group-hover:scale-[1.03] group-hover:border-[#7C5CFF] mb-4">
                 <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
               </div>
-              <h3 className="text-base font-display font-extrabold text-[#1A1A1A]">{member.name}</h3>
+              <h3 className="text-base font-display font-semibold text-[#1A1A1A]">{member.name}</h3>
               <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">{member.role}</p>
             </div>
           ))}

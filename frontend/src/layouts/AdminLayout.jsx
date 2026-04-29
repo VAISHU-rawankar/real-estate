@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@store/slices/authSlice';
+import { useNavigate, Outlet, Link, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCurrentUser, logout as authLogout } from '@store/slices/authSlice';
 import {
   HomeIcon, BuildingOfficeIcon, UsersIcon, ChartBarIcon,
-  CogIcon, Bars3Icon, XMarkIcon, BellIcon,
-  ArrowRightOnRectangleIcon
+  Bars3Icon, BellIcon, ArrowRightOnRectangleIcon,
+  ChevronDownIcon, CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useLogoutMutation } from '@store/api/authApi';
 import ToastContainer from '@components/common/ToastContainer';
@@ -17,63 +17,86 @@ const NAV_ITEMS = [
   { label: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
 ];
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = useSelector(selectCurrentUser);
   const location = useLocation();
-  const [logout] = useLogoutMutation();
+  const [logoutApi] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch (err) {
+      console.warn('Backend logout failed, forcing local logout');
+    } finally {
+      dispatch(authLogout());
+      navigate('/auth/login');
+    }
+  };
 
   const isActive = (href, exact) => exact ? location.pathname === href : location.pathname.startsWith(href);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#F8F9FB] flex font-sans">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <div className="w-9 h-9 rounded-lg bg-gold-gradient flex items-center justify-center">
-            <span className="text-white font-bold">R</span>
-          </div>
-          <div>
-            <p className="text-white font-display font-bold text-sm">RealEstate</p>
-            <p className="text-white/40 text-xs">Admin Portal</p>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav className="px-4 py-6 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive(item.href, item.exact)
-                  ? 'bg-gold-500/20 text-gold-400'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[280px] bg-[#111111] text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="h-[100px] flex items-center px-8">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#D4A853] flex items-center justify-center">
+                <BuildingOfficeIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-white">RealEstate <span className="text-[#D4A853]">Pro</span></span>
             </Link>
-          ))}
-        </nav>
-
-        {/* User + Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-full bg-gold-gradient flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{user?.name?.[0] || 'A'}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{user?.name}</p>
-              <p className="text-white/40 text-xs truncate">{user?.email}</p>
-            </div>
           </div>
-          <button onClick={() => logout()} className="flex items-center gap-2 text-white/50 hover:text-white text-sm w-full transition-colors">
-            <ArrowRightOnRectangleIcon className="w-4 h-4" />
-            Logout
-          </button>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 mt-4 space-y-2">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href, item.exact);
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 group ${
+                    active
+                      ? 'bg-gradient-to-r from-[#D4A853] to-[#B8891F] text-white shadow-lg shadow-[#D4A853]/20'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <item.icon className={`w-6 h-6 ${active ? 'text-white' : 'text-white/40 group-hover:text-white'}`} />
+                  <span className="text-[15px] font-semibold">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Bottom Profile */}
+          <div className="p-6">
+            <div className="bg-[#1A1A1A] rounded-2xl p-4 flex items-center gap-4 mb-4">
+              <div className="w-11 h-11 rounded-full bg-[#D4A853] flex items-center justify-center font-bold text-white text-lg">
+                {user?.name?.[0] || 'A'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[14px] font-bold text-white truncate uppercase tracking-tight">{user?.name || 'ADMIN USER'}</p>
+                <p className="text-white/40 text-[11px] truncate font-medium">{user?.email || 'pharshada962@gmail.com'}</p>
+              </div>
+            </div>
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center gap-3 px-4 py-2 text-white/60 hover:text-red-400 transition-colors w-full group font-bold text-[13px] uppercase tracking-wider"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5 rotate-180" />
+              <span>SIGN OUT</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -83,25 +106,34 @@ export default function AdminLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-600 hover:text-navy-900">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-[280px]">
+        {/* Top Header */}
+        <header className="h-[100px] flex items-center justify-between px-10 bg-transparent">
+          <div>
+            <h1 className="text-[28px] font-bold text-[#111111]">Dashboard</h1>
+            <p className="text-[#666666] text-sm mt-1">Welcome back, Admin! Here's what's happening with your real estate platform.</p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button className="relative w-11 h-11 rounded-full bg-white flex items-center justify-center text-[#111111] shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
+              <BellIcon className="w-6 h-6" />
+              <span className="absolute top-2 right-2 w-4 h-4 bg-[#EF4444] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">3</span>
+            </button>
+            
+            <button className="h-11 px-5 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center gap-3 text-sm font-semibold text-[#111111] hover:bg-gray-50 transition-colors">
+              <CalendarIcon className="w-5 h-5 text-gray-400" />
+              <span>May 15, 2024 - Jun 15, 2024</span>
+              <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+          
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-[#111111] absolute left-4">
             <Bars3Icon className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-4 ml-auto">
-            <button className="relative text-slate-500 hover:text-navy-900 transition-colors">
-              <BellIcon className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-gold-500 rounded-full" />
-            </button>
-            <div className="w-8 h-8 rounded-full bg-gold-gradient flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{user?.name?.[0] || 'A'}</span>
-            </div>
-          </div>
         </header>
 
-        <main className="flex-1 p-6 overflow-auto">
-          {children || <Outlet />}
+        <main className="flex-1 px-10 pb-10 overflow-auto">
+          <Outlet />
         </main>
       </div>
 

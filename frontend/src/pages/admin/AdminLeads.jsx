@@ -18,22 +18,22 @@ export default function AdminLeads() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-display font-bold text-navy-900">Leads</h1>
-            <p className="text-slate-400 text-sm">{data?.meta?.total || 0} total leads</p>
+            <h1 className="text-4xl font-display font-semibold text-[#1A1A1A] uppercase tracking-tight">Leads</h1>
+            <p className="text-[#666666] text-[10px] font-bold uppercase tracking-widest mt-2">{data?.meta?.total || 0} Total Leads</p>
           </div>
-          <a href="/api/v1/admin/leads/export" className="btn-outline btn-md">Export CSV</a>
+          <a href="/api/v1/admin/leads/export" className="bg-white border border-[#EAE6DF] hover:border-[#1A1A1A] text-[#1A1A1A] text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-full transition-colors">Export CSV</a>
         </div>
 
-        <div className="card overflow-hidden">
+        <div className="bg-white border border-[#EAE6DF] rounded-[24px] overflow-hidden shadow-sm">
           {isLoading ? (
             <div className="p-8 text-center text-slate-400">Loading leads...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-[#FAF8F5] border-b border-[#EAE6DF]">
                   <tr>
                     {['Name', 'Phone', 'Property', 'Source', 'Status', 'Date', 'Actions'].map((h) => (
-                      <th key={h} className="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider px-5 py-3.5">{h}</th>
+                      <th key={h} className="text-left text-[10px] font-bold text-[#666666] uppercase tracking-widest px-6 py-4">{h}</th>
                     ))}
                   </tr>
                 </thead>

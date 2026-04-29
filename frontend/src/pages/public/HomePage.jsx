@@ -14,12 +14,14 @@ import {
   BuildingOfficeIcon, 
   HomeIcon, 
   MapIcon,
+  UsersIcon,
   ArrowUpRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
   BuildingStorefrontIcon,
-  HeartIcon
+  HeartIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { useGetFeaturedPropertiesQuery, useGetPropertiesQuery } from '@store/api/propertyApi';
 import PropertyCard from '@components/property/PropertyCard';
@@ -132,84 +134,100 @@ export default function HomePage() {
       <Helmet>
         <title>NestQuest — Find Your Dream Home</title>
         <meta name="description" content="Welcome to NestQuest, where luxury meets lifestyle. Search for the perfect home that suits your budget." />
-      </Helmet>
-
-      {/* ─── Hero Section ───────────────────────────────────────────── */}
-      {/* ─── Hero Section ───────────────────────────────────────────── */}
-      <section className="bg-white px-4 sm:px-6 lg:px-12 py-10 md:py-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12">
-          {/* Left: Heading */}
-          <div className="max-w-2xl">
-            <h1 className="text-5xl sm:text-6xl lg:text-[76px] font-display font-extrabold tracking-tight leading-[1.05] text-[#1A1A1A] uppercase">
+      </Helmet>      {/* ─── Hero Section (First Fold) ─────────────────────────────────── */}
+      <section className="bg-white px-4 sm:px-6 lg:px-12 pt-5 md:pt-7 pb-4 md:pb-6">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-14 mb-10">
+          {/* Left: Massive Heading */}
+          <div className="lg:flex-[1.2]">
+            <h1 className="text-[42px] sm:text-[54px] lg:text-[72px] font-display font-semibold tracking-tight leading-[0.95] text-[#111111] uppercase">
               Find Your <br /> Perfect Home
             </h1>
           </div>
 
-          {/* Right: Description & Search */}
-          <div className="max-w-md w-full flex flex-col gap-4">
-            <p className="text-[#666666] text-sm leading-relaxed">
+          {/* Right: Integrated Search Unit */}
+          <div className="lg:flex-[0.8] flex flex-col gap-4">
+            <p className="text-[#666666] text-[15px] leading-relaxed max-w-md">
               We offer over 10,000 apartments for every request. You are guaranteed to be able to find an apartment that suits you.
             </p>
-
-            {/* Buy/Rent Toggle */}
-            <div className="flex gap-2">
-              <button 
-                type="button" 
-                onClick={() => setSearchType('sale')} 
-                className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all duration-300 ${searchType === 'sale' ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]' : 'bg-white text-[#666666] border-[#EAE6DF]'}`}
-              >
-                Buy
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setSearchType('rent')} 
-                className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all duration-300 ${searchType === 'rent' ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]' : 'bg-white text-[#666666] border-[#EAE6DF]'}`}
-              >
-                Rent
-              </button>
-            </div>
             
-            {/* Sleek Smart Search Bar */}
-            <form onSubmit={handleHeroSearch} className="flex items-center border border-[#EAE6DF] rounded-xl overflow-hidden shadow-sm bg-white focus-within:border-[#1A1A1A] transition-colors">
-              <div className="flex items-center pl-4 text-[#666666]">
-                <MagnifyingGlassIcon className="w-5 h-5" />
+            <div className="flex flex-col gap-1.5">
+              {/* Buy/Rent Toggle */}
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setSearchType('sale')}
+                  className={`px-5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+                    searchType === 'sale' 
+                      ? 'bg-[#111111] text-white shadow-lg' 
+                      : 'bg-white border border-[#EAE6DF] text-[#666666] hover:text-[#111111] hover:border-[#111111]'
+                  }`}
+                >
+                  Buy
+                </button>
+                <button 
+                  onClick={() => setSearchType('rent')}
+                  className={`px-5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+                    searchType === 'rent' 
+                      ? 'bg-[#111111] text-white shadow-lg' 
+                      : 'bg-white border border-[#EAE6DF] text-[#666666] hover:text-[#111111] hover:border-[#111111]'
+                  }`}
+                >
+                  Rent
+                </button>
               </div>
-              <input 
-                type="text" 
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                placeholder="City or locality..." 
-                className="w-full py-4 pl-3 text-sm text-[#1A1A1A] placeholder-[#999999] focus:outline-none focus:ring-0 border-none bg-transparent"
-              />
-              
-              <select
-                value={searchPropType}
-                onChange={(e) => setSearchPropType(e.target.value)}
-                className="bg-transparent border-l border-[#EAE6DF] text-xs font-bold focus:outline-none focus:ring-0 text-[#1A1A1A] px-3 h-[52px] cursor-pointer"
-              >
-                <option value="">All Types</option>
-                <option value="apartment">Apartment</option>
-                <option value="villa">Villa</option>
-                <option value="commercial">Commercial</option>
-                <option value="plot">Plot</option>
-              </select>
 
-              <button type="submit" className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white px-5 h-[52px] flex items-center justify-center transition-colors">
-                <ArrowRightIcon className="w-5 h-5 text-white" />
-              </button>
-            </form>
+              {/* Precise Search Box */}
+              <form onSubmit={handleHeroSearch} className="w-full bg-white border border-[#EAE6DF] rounded-[14px] overflow-hidden shadow-sm p-0.5 flex items-center gap-1.5">
+                <div className="flex-1 flex items-center gap-3 px-3">
+                  <MagnifyingGlassIcon className="w-3.5 h-3.5 text-[#999999]" />
+                  <input 
+                    type="text" 
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                    placeholder="City or locality..."
+                    className="w-full bg-transparent border-0 outline-0 text-[12px] font-medium placeholder:text-[#999999] text-[#111111] py-1.5"
+                  />
+                </div>
+                
+                <div className="h-5 w-px bg-[#EAE6DF] hidden sm:block" />
+                
+                <div className="relative hidden sm:block">
+                  <select 
+                    value={searchPropType}
+                    onChange={(e) => setSearchPropType(e.target.value)}
+                    className="bg-transparent text-[11px] font-bold border-0 outline-0 text-[#111111] px-4 py-1.5 cursor-pointer appearance-none pr-8"
+                  >
+                    <option value="">All Types</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="villa">Villa</option>
+                    <option value="plot">Plot</option>
+                    <option value="commercial">Commercial</option>
+                  </select>
+                  <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 text-[#111111] pointer-events-none" />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="w-9 h-9 rounded-[9px] bg-[#111111] hover:bg-black text-white flex items-center justify-center transition-all flex-shrink-0 active:scale-95 shadow-md"
+                >
+                  <ArrowRightIcon className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
 
-        {/* Large Hero Image */}
-        <div className="max-w-7xl mx-auto rounded-[32px] overflow-hidden shadow-md aspect-[16/9] md:aspect-[21/9]">
-          <img 
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
-            alt="Modern Luxury Home" 
-            className="w-full h-full object-cover object-center"
-          />
+        {/* Hero Image Container */}
+        <div className="max-w-7xl mx-auto relative px-0 -mt-4">
+          <div className="relative rounded-[40px] overflow-hidden min-h-[300px] lg:h-[480px] border border-gray-50 shadow-2xl">
+            <img 
+              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
+              alt="Luxury modern architectural residence" 
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
+            />
+          </div>
         </div>
       </section>
+
       {/* ─── Second Fold: Explore & Discover Section ────────────────────────────── */}
       <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-[#FAF8F5]/30">
         <div className="max-w-7xl mx-auto">
@@ -217,10 +235,10 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-4 h-4 text-[#7C5CFF] font-extrabold">⊞</span>
-                <span className="text-[#7C5CFF] text-xxs font-extrabold tracking-wider uppercase">HANDPICKED LISTINGS</span>
+                <span className="w-4 h-4 text-[#7C5CFF] font-semibold">⊞</span>
+                <span className="text-[#7C5CFF] text-xxs font-semibold tracking-wider uppercase">HANDPICKED LISTINGS</span>
               </div>
-              <h2 className="text-3xl sm:text-[44px] font-display font-extrabold text-[#1A1A1A] leading-[1.1] uppercase">
+              <h2 className="text-3xl sm:text-[44px] font-display font-semibold text-[#1A1A1A] leading-[1.1] uppercase">
                 Explore Apartments and <br /> Homes for Sale
               </h2>
               <p className="text-gray-400 text-xs font-semibold mt-2">Discover premium properties in the best locations.</p>
@@ -333,7 +351,7 @@ export default function HomePage() {
                   </div>
                   <div className="p-5 flex flex-col justify-between flex-1 text-[#1A1A1A]">
                     <div>
-                      <span className="text-xl font-display font-extrabold leading-tight text-[#1A1A1A]">
+                      <span className="text-xl font-display font-semibold leading-tight text-[#1A1A1A]">
                         {item.price}
                       </span>
                       <h3 className="text-sm font-bold truncate mt-1 text-gray-800">
@@ -369,7 +387,7 @@ export default function HomePage() {
             />
           </div>
           <div>
-            <h2 className="text-4xl sm:text-5xl font-display font-extrabold tracking-tight text-[#1A1A1A] leading-[1.1] mb-4 uppercase">
+            <h2 className="text-4xl sm:text-5xl font-display font-semibold tracking-tight text-[#1A1A1A] leading-[1.1] mb-4 uppercase">
               Your Trusted Real <br /> Estate Advisors
             </h2>
             <p className="text-[#666666] mb-12 max-w-md text-sm leading-relaxed">
@@ -402,7 +420,7 @@ export default function HomePage() {
               <span>10,000+ Homes Available</span>
             </div>
             
-            <h2 className="text-5xl sm:text-6xl font-display font-extrabold tracking-tight text-[#1A1A1A] leading-[0.95] mb-6 uppercase">
+            <h2 className="text-5xl sm:text-6xl font-display font-semibold tracking-tight text-[#1A1A1A] leading-[0.95] mb-6 uppercase">
               Find Your <br /> Perfect Home
             </h2>
             
@@ -460,7 +478,6 @@ export default function HomePage() {
             </form>
           </div>
 
-          {/* Right Column: Interactive Accordion Categories */}
           <div className="lg:col-span-7 flex flex-col gap-4 w-full">
             {CATEGORIES.map((cat, i) => {
               const isActive = activeCategoryIdx === i;
@@ -478,7 +495,7 @@ export default function HomePage() {
                       <div className="w-10 h-10 rounded-full bg-[#F3E8FF] text-[#6B21A8] flex items-center justify-center mb-3">
                         <HomeIcon className="w-5 h-5" />
                       </div>
-                      <h3 className="text-2xl font-display font-extrabold text-[#1A1A1A] mb-2">{cat.label}</h3>
+                      <h3 className="text-2xl font-display font-semibold text-[#1A1A1A] mb-2">{cat.label}</h3>
                       <p className="text-[#666666] text-xs leading-relaxed mb-4">{cat.desc}</p>
                       <Link 
                         to={`/properties?propertySubType=${cat.type}&listingType=${searchType}`}
@@ -539,7 +556,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto bg-[#0B0B0F] rounded-2xl p-2 sm:p-4 border border-[#1F1F2A] shadow-2xl relative z-10">
           
           {/* Upper Split Hero Block */}
-          <div className="relative w-full rounded-2xl overflow-hidden min-h-[260px] flex items-center mb-8 border border-white/5 group shadow-inner">
+          <div className="relative w-full rounded-2xl overflow-hidden min-h-[210px] flex items-center mb-6 border border-white/5 group shadow-inner">
             {/* Background Image */}
             <img 
               src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070" 
@@ -550,11 +567,11 @@ export default function HomePage() {
             <div className="absolute inset-y-0 left-0 w-full md:w-3/5 bg-gradient-to-r from-[#0B0B0F] via-[#0B0B0F]/90 to-transparent z-10" />
 
             {/* Left Content */}
-            <div className="relative z-20 p-6 md:p-10 max-w-xl">
-              <span className="text-[#7C5CFF] text-xs font-extrabold tracking-wider uppercase bg-[#7C5CFF]/10 px-3 py-1 rounded-full border border-[#7C5CFF]/20">
+            <div className="relative z-20 p-5 md:p-8 max-w-xl">
+              <span className="text-[#7C5CFF] text-xs font-semibold tracking-wider uppercase bg-[#7C5CFF]/10 px-3 py-1 rounded-full border border-[#7C5CFF]/20">
                 JUST IN
               </span>
-              <h2 className="text-3xl md:text-[42px] font-display font-extrabold tracking-tight text-white leading-[1.1] mt-4 mb-4 uppercase">
+              <h2 className="text-3xl md:text-[42px] font-display font-semibold tracking-tight text-white leading-[1.1] mt-4 mb-4 uppercase">
                 Recently Added <br /> Properties
               </h2>
               <p className="text-gray-400 text-sm font-medium mb-4 max-w-sm leading-relaxed">
@@ -574,7 +591,7 @@ export default function HomePage() {
               <div className="w-7 h-7 rounded-full bg-[#7C5CFF]/20 flex items-center justify-center border border-[#7C5CFF]/30">
                 <HomeIcon className="w-3.5 h-3.5 text-[#7C5CFF]" />
               </div>
-              <span className="text-2xl font-display font-extrabold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">10,000+</span>
+              <span className="text-2xl font-display font-semibold leading-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">10,000+</span>
               <span className="text-gray-400 text-[9px] font-semibold leading-relaxed">New listings added every month</span>
             </div>
           </div>
@@ -717,7 +734,7 @@ export default function HomePage() {
                   {/* Bottom half: Content */}
                   <div className="p-3.5 flex flex-col flex-1 justify-between text-[#0B0B0F]">
                     <div>
-                      <span className="text-sm font-display font-extrabold leading-tight text-[#0B0B0F] group-hover:text-[#7C5CFF] transition-colors duration-300">
+                      <span className="text-sm font-display font-semibold leading-tight text-[#0B0B0F] group-hover:text-[#7C5CFF] transition-colors duration-300">
                         {p.price}
                       </span>
                       <h3 className="text-[10px] font-bold truncate mt-1 text-[#1A1A1A]">
@@ -748,10 +765,10 @@ export default function HomePage() {
       <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-[#FAF8F5]">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-16 gap-8">
-            <h2 className="text-4xl sm:text-5xl font-display font-extrabold text-[#1A1A1A] leading-tight max-w-xl uppercase">
-              Expert Services for Buyers, <br />
-              <span className="italic font-normal">Sellers, and Investors</span>
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
+            <h2 className="text-4xl sm:text-5xl font-display font-semibold text-[#1A1A1A] leading-tight max-w-4xl uppercase tracking-tight">
+              Expert Services for <br />
+              Buyers, Sellers, and Investors
             </h2>
             
             {/* Tags */}
@@ -759,10 +776,10 @@ export default function HomePage() {
               {['Commercial', 'Property', 'House', 'Store', 'Apartments'].map((tag) => (
                 <span 
                   key={tag} 
-                  className={`px-4 py-2 rounded-full text-xs font-semibold border ${
+                  className={`px-3 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase border transition-all duration-300 cursor-default ${
                     tag === 'Property' 
-                      ? 'bg-white border-[#1A1A1A] text-[#1A1A1A]' 
-                      : 'bg-[#FAF8F5] border-[#EAE6DF] text-[#666666]'
+                      ? 'bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-md' 
+                      : 'bg-white border-[#EAE6DF] text-[#666666] hover:border-[#7C5CFF] hover:text-[#7C5CFF]'
                   }`}
                 >
                   {tag}
@@ -772,10 +789,10 @@ export default function HomePage() {
           </div>
 
           {/* Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
             {/* Column 1 (Buy a home) */}
-            <div className="flex flex-col gap-6">
-              <div className="rounded-[32px] overflow-hidden aspect-[4/3] w-full shadow-sm">
+            <div className="flex flex-col gap-4">
+              <div className="rounded-[24px] overflow-hidden aspect-[16/10] w-full shadow-sm">
                 <img 
                   src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600" 
                   alt="Modern House with pool" 
@@ -783,34 +800,34 @@ export default function HomePage() {
                 />
               </div>
               <div>
-                <h3 className="text-2xl font-display font-semibold text-[#1A1A1A] mb-3">Buy a home</h3>
-                <p className="text-[#666666] text-sm leading-relaxed mb-6">
+                <h3 className="text-xl font-display font-semibold text-[#1A1A1A] mb-1">Buy a home</h3>
+                <p className="text-[#666666] text-xs leading-relaxed mb-3">
                   Find your place with an immersive photo experience and the most listings, including
                 </p>
                 <Link 
                   to="/properties?listingType=sale" 
-                  className="inline-flex items-center gap-1 bg-[#FAF8F5] hover:bg-[#EAE6DF] border border-[#EAE6DF] text-[#1A1A1A] text-xs font-bold px-5 py-3 rounded-full transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 bg-[#FAF8F5] hover:bg-[#EAE6DF] border border-[#EAE6DF] text-[#1A1A1A] text-[10px] font-bold px-4 py-2 rounded-full transition-colors shadow-sm"
                 >
-                  View Details <ArrowUpRightIcon className="w-4 h-4 text-gray-500" />
+                  View Details <ArrowUpRightIcon className="w-3.5 h-3.5 text-gray-500" />
                 </Link>
               </div>
             </div>
 
             {/* Column 2 (Selling a home) */}
-            <div className="flex flex-col-reverse md:flex-col gap-6 md:pb-12">
+            <div className="flex flex-col-reverse md:flex-col gap-4 md:pb-6">
               <div>
-                <h3 className="text-2xl font-display font-semibold text-[#1A1A1A] mb-3">Selling a home</h3>
-                <p className="text-[#666666] text-sm leading-relaxed mb-6">
+                <h3 className="text-xl font-display font-semibold text-[#1A1A1A] mb-1">Selling a home</h3>
+                <p className="text-[#666666] text-xs leading-relaxed mb-3">
                   No matter what path you take to sell your home, we can help you navigate a successful sale.
                 </p>
                 <Link 
                   to="/contact" 
-                  className="inline-flex items-center gap-1 bg-[#FAF8F5] hover:bg-[#EAE6DF] border border-[#EAE6DF] text-[#1A1A1A] text-xs font-bold px-5 py-3 rounded-full transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1 bg-[#FAF8F5] hover:bg-[#EAE6DF] border border-[#EAE6DF] text-[#1A1A1A] text-[10px] font-bold px-4 py-2 rounded-full transition-colors shadow-sm"
                 >
-                  View Details <ArrowUpRightIcon className="w-4 h-4 text-gray-500" />
+                  View Details <ArrowUpRightIcon className="w-3.5 h-3.5 text-gray-500" />
                 </Link>
               </div>
-              <div className="rounded-[32px] overflow-hidden aspect-[4/3] w-full shadow-sm">
+              <div className="rounded-[24px] overflow-hidden aspect-[16/10] w-full shadow-sm">
                 <img 
                   src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600" 
                   alt="Luxury Villa" 
@@ -820,31 +837,31 @@ export default function HomePage() {
             </div>
 
             {/* Column 3 (Rent a home) */}
-            <div className="flex flex-col gap-6">
-              <div className="relative rounded-[32px] overflow-hidden aspect-[4/3] w-full shadow-sm">
+            <div className="flex flex-col gap-4">
+              <div className="relative rounded-[24px] overflow-hidden aspect-[16/10] w-full shadow-sm">
                 <img 
                   src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600" 
                   alt="Smart Home" 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1">
-                  {['Smart Home', 'Smart Home', 'Smart Home', 'Property'].map((tag, idx) => (
-                    <span key={idx} className="bg-black/40 backdrop-blur-sm text-white text-xxs font-medium px-2 py-1 rounded-md shadow-sm">
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 flex flex-wrap gap-1">
+                  {['Smart Home', 'Property'].map((tag, idx) => (
+                    <span key={idx} className="bg-black/40 backdrop-blur-sm text-white text-[8px] font-medium px-1.5 py-0.5 rounded shadow-sm">
                       {tag}
                     </span>
                   ))}
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-display font-semibold text-[#1A1A1A] mb-3">Rent a home</h3>
-                <p className="text-[#666666] text-sm leading-relaxed mb-6">
+                <h3 className="text-xl font-display font-semibold text-[#1A1A1A] mb-1">Rent a home</h3>
+                <p className="text-[#666666] text-xs leading-relaxed mb-3">
                   We're creating a seamless online experience – from shopping on the largest rental network
                 </p>
                 <Link 
                   to="/properties?listingType=rent" 
-                  className="inline-flex items-center gap-1 bg-[#5A3825] hover:bg-[#4A2E1F] text-white text-xs font-bold px-5 py-3 rounded-full transition-colors shadow-md"
+                  className="inline-flex items-center gap-1 bg-[#5A3825] hover:bg-[#4A2E1F] text-white text-[10px] font-bold px-4 py-2 rounded-full transition-colors shadow-md"
                 >
-                  View Details <ArrowUpRightIcon className="w-4 h-4" />
+                  View Details <ArrowUpRightIcon className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
@@ -878,7 +895,7 @@ export default function HomePage() {
           <div className="inline-flex items-center bg-[#FAF8F5] border border-[#EAE6DF] rounded-full px-5 py-1.5 text-xs font-bold text-[#1A1A1A] mb-4 shadow-sm">
             They already love our products 😍
           </div>
-          <h2 className="text-4xl sm:text-[52px] font-display font-extrabold text-[#1A1A1A] tracking-tight leading-[1.1] uppercase">
+          <h2 className="text-4xl sm:text-[52px] font-display font-semibold text-[#1A1A1A] tracking-tight leading-[1.1] uppercase">
             See what our users say about us
           </h2>
         </div>
@@ -954,7 +971,7 @@ export default function HomePage() {
 
           {/* Content */}
           <div className="relative z-20 p-6 md:p-12 max-w-xl text-left">
-            <h2 className="text-3xl md:text-[42px] font-display font-extrabold tracking-tight text-white leading-[1.1] mb-4 uppercase">
+            <h2 className="text-3xl md:text-[42px] font-display font-semibold tracking-tight text-white leading-[1.1] mb-4 uppercase">
               Ready to Find Your <br />
               <span className="text-[#7C5CFF]">Dream Home?</span>
             </h2>

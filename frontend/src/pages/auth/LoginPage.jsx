@@ -27,7 +27,8 @@ export default function LoginPage() {
         navigate(`/auth/verify-otp?email=${encodeURIComponent(email)}`, { replace: true });
       } else {
         dispatch(showToast({ type: 'success', message: 'Welcome back!' }));
-        navigate(returnUrl, { replace: true });
+        const finalUrl = res?.data?.user?.role === 'admin' ? '/admin' : returnUrl;
+        navigate(finalUrl, { replace: true });
       }
     } catch (err) {
       dispatch(showToast({ type: 'error', message: err?.data?.error?.message || 'Login failed. Please try again.' }));

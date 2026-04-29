@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-    googleId: { type: String, sparse: true },
+    googleId: { type: String, unique: true, sparse: true },
     avatar: { type: String },
     refreshToken: { type: String, select: false },
     lastLoginAt: { type: Date },
@@ -69,9 +69,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ──────────────────────────────────────────────────────────────────
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ phone: 1 }, { unique: true, sparse: true });
-userSchema.index({ googleId: 1 }, { sparse: true });
+// unique/sparse indexes handled in field definitions
 userSchema.index({ role: 1, isActive: 1 });
 
 // ─── Virtual: full display name ───────────────────────────────────────────────

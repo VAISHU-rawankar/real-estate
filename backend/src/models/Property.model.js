@@ -42,7 +42,7 @@ const propertySchema = new mongoose.Schema(
   {
     // ─── Identity ────────────────────────────────────────────────────────────
     title: { type: String, required: [true, 'Title is required'], trim: true, maxlength: 200 },
-    slug: { type: String, unique: true, lowercase: true, index: true },
+    slug: { type: String, unique: true, lowercase: true },
     description: { type: String, maxlength: 5000 },
 
     // ─── Classification ──────────────────────────────────────────────────────
@@ -104,8 +104,8 @@ const propertySchema = new mongoose.Schema(
       type: String,
       enum: ['studio', '1bhk', '2bhk', '3bhk', '4bhk', '4+bhk'],
     },
-    bathrooms: { type: Number, min: 0, max: 20 },
-    balconies: { type: Number, min: 0, max: 10 },
+    bathrooms: { type: Number, min: 0, max: 100 },
+    balconies: { type: Number, min: 0, max: 100 },
     floorNumber: { type: Number },
     totalFloors: { type: Number },
     facing: {
@@ -217,7 +217,7 @@ propertySchema.index({ 'location.city': 1, status: 1, propertyType: 1 });
 propertySchema.index({ price: 1, status: 1 });
 propertySchema.index({ status: 1, isFeatured: 1, createdAt: -1 });
 propertySchema.index({ reraNumber: 1 }, { sparse: true });
-propertySchema.index({ slug: 1 }, { unique: true });
+// slug index handled in field definition
 propertySchema.index(
   { title: 'text', description: 'text', 'location.locality': 'text', 'location.city': 'text', projectName: 'text' },
   { weights: { title: 10, 'location.locality': 5, 'location.city': 3, description: 1 } }
