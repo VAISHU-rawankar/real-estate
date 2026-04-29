@@ -14,10 +14,11 @@ const corsOptions = {
       return callback(new Error('No origin — CORS rejected'), false);
     }
 
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
 
+    console.error(`[CORS REJECTED] Origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
     return callback(new Error(`CORS: Origin ${origin} not allowed`), false);
   },
   credentials: true,
