@@ -76,9 +76,34 @@ async function login({ email, password }) {
     throw Object.assign(new Error('Invalid email or password'), { statusCode: 401, code: 'INVALID_CREDENTIALS' });
   }
 
+  if (user.role === 'admin') {
+    await sendOTP({ contact: email, contactType: 'email', type: 'admin-2fa' });
+    return { require2FA: true, email };
+  }
+
   const tokens = generateTokens(user);
 
   // Rotate refresh token
+  user.refreshToken = await bcrypt.hash(tokens.refreshToken, 8);
+  user.lastLoginAt = new Date();
+  await user.save();
+
+  return { user: user.toJSON(), ...tokens };
+}
+
+async function verifyAdmin2FA({ email, code }) {
+  const user = await User.findOne({ email }).select('+refreshToken');
+  if (!user) {
+    throw Object.assign(new Error('User not found'), { statusCode: 404, code: 'USER_NOT_FOUND' });
+  }
+
+  if (user.role !== 'admin') {
+    throw Object.assign(new Error('Unauthorized'), { statusCode: 403, code: 'UNAUTHORIZED' });
+  }
+
+  await verifyOTP({ contact: email, code, type: 'admin-2fa' });
+
+  const tokens = generateTokens(user);
   user.refreshToken = await bcrypt.hash(tokens.refreshToken, 8);
   user.lastLoginAt = new Date();
   await user.save();
@@ -271,6 +296,7 @@ async function logout(userId) {
 module.exports = {
   register,
   login,
+  verifyAdmin2FA,
   refreshAccessToken,
   sendOTP,
   verifyOTP,

@@ -53,11 +53,16 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-          <StatCard title="Total Properties" value={stats.properties?.total} subtitle={`${stats.properties?.active || 0} active`} icon={BuildingOfficeIcon} color="bg-blue-50 text-blue-600" trend={12} />
-          <StatCard title="Featured" value={stats.properties?.featured} subtitle="Paid listings" icon={StarIcon} color="bg-gold-50 text-gold-600" />
-          <StatCard title="Total Leads" value={stats.leads?.total} subtitle={`${stats.leads?.todayCount || 0} today`} icon={UsersIcon} color="bg-emerald-50 text-emerald-600" trend={8} />
-          <StatCard title="Properties Sold" value={stats.properties?.sold} subtitle="All time" icon={ChartBarIcon} color="bg-purple-50 text-purple-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <StatCard title="Total Listings" value={stats.properties?.total} icon={BuildingOfficeIcon} color="bg-blue-50 text-blue-600" />
+          <StatCard title="Active Listings" value={stats.properties?.active} icon={BuildingOfficeIcon} color="bg-emerald-50 text-emerald-600" />
+          <StatCard title="Sold / Rented" value={(stats.properties?.sold || 0) + (stats.properties?.rented || 0)} icon={ChartBarIcon} color="bg-purple-50 text-purple-600" />
+          <StatCard title="Draft Listings" value={stats.properties?.draft} icon={BuildingOfficeIcon} color="bg-slate-50 text-slate-600" />
+          
+          <StatCard title="New Leads Today" value={stats.leads?.todayCount} icon={UsersIcon} color="bg-amber-50 text-amber-600" />
+          <StatCard title="Total Leads" value={stats.leads?.total} icon={UsersIcon} color="bg-emerald-50 text-emerald-600" />
+          <StatCard title="Featured Listings" value={stats.properties?.featured} icon={StarIcon} color="bg-gold-50 text-gold-600" />
+          <StatCard title="Media Storage Used" value={`${stats.properties?.mediaStorageUsed || 0.01} GB`} icon={BuildingOfficeIcon} color="bg-rose-50 text-rose-600" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

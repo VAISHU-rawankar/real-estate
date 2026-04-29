@@ -323,20 +323,25 @@ async function toggleFeatured(propertyId) {
  * @returns {Promise<Object>}
  */
 async function getDashboardStats() {
-  const now = new Date();
-  const todayStart = new Date(now.setHours(0, 0, 0, 0));
-
-  const [statusCounts, featuredCount] = await Promise.all([
+  const [statusCounts, featuredCount, allProperties] = await Promise.all([
     Property.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]),
     Property.countDocuments({ isFeatured: true }),
+    Property.find().select('images floorPlanImages').lean(),
   ]);
 
   const stats = statusCounts.reduce((acc, item) => {
     acc[item._id] = item.count;
     return acc;
   }, {});
+
+  let totalImages = 0;
+  allProperties.forEach((p) => {
+    if (p.images) totalImages += p.images.length;
+    if (p.floorPlanImages) totalImages += p.floorPlanImages.length;
+  });
+  const mediaStorageUsed = Math.max(0.01, (totalImages * 350 * 1024) / (1024 * 1024 * 1024));
 
   return {
     total: Object.values(stats).reduce((a, b) => a + b, 0),
@@ -346,6 +351,7 @@ async function getDashboardStats() {
     rented: stats.rented || 0,
     archived: stats.archived || 0,
     featured: featuredCount,
+    mediaStorageUsed: parseFloat(mediaStorageUsed.toFixed(3)),
   };
 }
 

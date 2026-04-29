@@ -18,6 +18,11 @@ const ContactPage = lazy(() => import('@pages/public/ContactPage'));
 const BlogPage = lazy(() => import('@pages/public/BlogPage'));
 const BlogDetailPage = lazy(() => import('@pages/public/BlogDetailPage'));
 const NotFoundPage = lazy(() => import('@pages/public/NotFoundPage'));
+const PrivacyPolicyPage = lazy(() => import('@pages/public/PrivacyPolicyPage'));
+const TermsAndConditionsPage = lazy(() => import('@pages/public/TermsAndConditionsPage'));
+const DisclaimerPage = lazy(() => import('@pages/public/DisclaimerPage'));
+const SitemapPage = lazy(() => import('@pages/public/SitemapPage'));
+const ComparePage = lazy(() => import('@pages/public/ComparePage'));
 
 const LoginPage = lazy(() => import('@pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@pages/auth/RegisterPage'));
@@ -56,6 +61,11 @@ const router = createBrowserRouter([
           { path: 'contact', element: <Suspense fallback={<SuspenseFallback />}><ContactPage /></Suspense> },
           { path: 'blog', element: <Suspense fallback={<SuspenseFallback />}><BlogPage /></Suspense> },
           { path: 'blog/:slug', element: <Suspense fallback={<SuspenseFallback />}><BlogDetailPage /></Suspense> },
+          { path: 'privacy', element: <Suspense fallback={<SuspenseFallback />}><PrivacyPolicyPage /></Suspense> },
+          { path: 'terms', element: <Suspense fallback={<SuspenseFallback />}><TermsAndConditionsPage /></Suspense> },
+          { path: 'disclaimer', element: <Suspense fallback={<SuspenseFallback />}><DisclaimerPage /></Suspense> },
+          { path: 'sitemap', element: <Suspense fallback={<SuspenseFallback />}><SitemapPage /></Suspense> },
+          { path: 'compare', element: <Suspense fallback={<SuspenseFallback />}><ComparePage /></Suspense> },
         ],
       },
       {

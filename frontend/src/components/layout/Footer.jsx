@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRightIcon } from '@heroicons/react/24/outline';
 
 const FOOTER_LINKS = {
   'Company': [
@@ -19,7 +20,6 @@ const FOOTER_LINKS = {
     { label: 'Pune', href: '/properties?city=Pune' },
     { label: 'Bangalore', href: '/properties?city=Bangalore' },
     { label: 'Hyderabad', href: '/properties?city=Hyderabad' },
-    { label: 'Nashik', href: '/properties?city=Nashik' },
   ],
   'Legal': [
     { label: 'Privacy Policy', href: '/privacy' },
@@ -30,38 +30,32 @@ const FOOTER_LINKS = {
 
 export default function Footer() {
   return (
-    <footer className="bg-navy-900 text-white">
-      <div className="page-container pt-16 pb-10">
-        {/* Top */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 pb-12 border-b border-white/10">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #D4A853, #E8B84B)' }}>
-                <span className="text-white font-bold text-lg">R</span>
-              </div>
-              <span className="font-display font-bold text-xl">RealEstate</span>
-            </Link>
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
-              India's most trusted platform for buying, selling, and renting verified real estate properties across 50+ cities.
-            </p>
-            <div className="flex items-center gap-3 mt-6">
-              {['Twitter', 'LinkedIn', 'Instagram'].map((s) => (
-                <a key={s} href="#" className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors text-xs font-medium">
-                  {s[0]}
-                </a>
-              ))}
-            </div>
-          </div>
+    <footer className="bg-[#0D0D0D] text-white pt-24 pb-12 px-4 sm:px-6 lg:px-12">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 pb-16 border-b border-white/10">
+        {/* Contact/Brand */}
+        <div>
+          <span className="font-display font-extrabold text-2xl tracking-widest text-[#D4A853] block mb-4">RealEstate</span>
+          <p className="text-white/50 text-sm max-w-xs mb-6">
+            India's most trusted platform for buying, selling, and renting verified real estate properties.
+          </p>
+          <a 
+            href="mailto:contact@realestate.com" 
+            className="text-lg font-display font-medium flex items-center gap-2 hover:text-white/80 transition-colors text-white"
+          >
+            contact@realestate.com
+            <ArrowUpRightIcon className="w-5 h-5 text-[#8C6D45]" />
+          </a>
+        </div>
 
-          {/* Links */}
+        {/* Links Columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
           {Object.entries(FOOTER_LINKS).map(([section, links]) => (
             <div key={section}>
-              <h4 className="text-sm font-semibold text-white/80 mb-4 uppercase tracking-wider">{section}</h4>
-              <ul className="space-y-3">
+              <h4 className="font-semibold text-white/50 mb-6 uppercase tracking-wider text-xs">{section}</h4>
+              <ul className="space-y-4">
                 {links.map((link) => (
-                  <li key={link.href}>
-                    <Link to={link.href} className="text-white/40 hover:text-gold-400 text-sm transition-colors">
+                  <li key={link.label}>
+                    <Link to={link.href} className="hover:text-[#8C6D45] text-white/70 transition-colors">
                       {link.label}
                     </Link>
                   </li>
@@ -70,15 +64,17 @@ export default function Footer() {
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-          <p className="text-white/30 text-sm">
-            © {new Date().getFullYear()} RealEstate Platform. All rights reserved.
-          </p>
-          <p className="text-white/20 text-xs">
-            RERA Registered | Built with ❤️ in India
-          </p>
+      {/* Huge Brand Name */}
+      <div className="max-w-7xl mx-auto mt-16 text-center">
+        <h2 className="text-[12vw] font-display font-black tracking-tighter leading-none text-white/5 select-none pointer-events-none">
+          RealEstate
+        </h2>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 text-xs text-white/30 border-t border-white/5 pt-8">
+          <p>© {new Date().getFullYear()} RealEstate Platform. All rights reserved.</p>
+          <p className="text-white/20">RERA Registered | Built with ❤️ in India</p>
         </div>
       </div>
     </footer>

@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.CLIENT_URL || 'http://localhost:3000')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim().replace(/\/$/, ''));
 
 const corsOptions = {
   origin(origin, callback) {

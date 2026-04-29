@@ -37,7 +37,7 @@ module.exports = {
 
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['Poppins', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
 

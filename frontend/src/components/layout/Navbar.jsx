@@ -40,11 +40,8 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const navBg = scrolled || !isHomePage
-    ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100'
-    : 'bg-transparent';
-
-  const textColor = scrolled || !isHomePage ? 'text-navy-900' : 'text-white';
+  const navBg = 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100';
+  const textColor = 'text-[#1A1A1A]';
 
   const handleLogout = async () => {
     await logout();
@@ -57,10 +54,7 @@ export default function Navbar() {
       <div className="page-container h-full flex items-center justify-between gap-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gold-gradient flex items-center justify-center shadow-gold">
-            <span className="text-white font-bold text-lg leading-none">R</span>
-          </div>
-          <span className={`font-display font-bold text-xl transition-colors ${textColor}`}>RealEstate</span>
+          <span className={`font-display font-extrabold text-xl tracking-wider transition-colors ${textColor}`}>RealEstate</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -71,8 +65,8 @@ export default function Navbar() {
               to={link.href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 location.pathname.startsWith(link.href)
-                  ? 'text-gold-500 font-semibold'
-                  : `${textColor} hover:text-gold-500`
+                  ? 'text-[#8C6D45] font-semibold'
+                  : `${textColor} hover:text-[#8C6D45]`
               }`}
             >
               {link.label}
@@ -165,12 +159,12 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <Link to="/auth/login" className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${textColor} hover:text-gold-500`}>
+            <div className="hidden sm:flex items-center gap-4">
+              <Link to="/auth/login" className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${textColor} hover:text-[#8C6D45]`}>
                 Sign In
               </Link>
-              <Link to="/auth/register" className="btn-sm btn-primary text-sm px-4 py-2">
-                Get Started
+              <Link to="/contact" className="bg-[#1A1A1A] text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-[#2A2A2A] transition-colors shadow-sm">
+                Contact Us
               </Link>
             </div>
           )}

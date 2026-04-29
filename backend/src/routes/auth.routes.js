@@ -39,12 +39,18 @@ const resetSchema = z.object({
   newPassword: z.string().min(8).max(100),
 });
 
+const verifyAdmin2FASchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+});
+
 router.post('/register', authLimiter, validate(registerSchema), controller.register);
 router.post('/login', authLimiter, validate(loginSchema), controller.login);
 router.post('/refresh-token', controller.refreshToken);
 router.post('/logout', requireAuth, controller.logout);
 router.post('/send-otp', otpLimiter, validate(otpSchema), controller.sendOTP);
 router.post('/verify-otp', otpLimiter, validate(verifyOTPSchema), controller.verifyOTP);
+router.post('/verify-admin-2fa', authLimiter, validate(verifyAdmin2FASchema), controller.verifyAdmin2FA);
 router.post('/forgot-password', authLimiter, validate(forgotSchema), controller.forgotPassword);
 router.post('/reset-password', authLimiter, validate(resetSchema), controller.resetPassword);
 

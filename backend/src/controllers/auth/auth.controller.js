@@ -26,10 +26,25 @@ const register = asyncHandler(async (req, res) => {
  */
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.validatedBody;
-  const { user, accessToken, refreshToken } = await authService.login({ email, password });
+  const result = await authService.login({ email, password });
+
+  if (result.require2FA) {
+    return sendSuccess(res, { data: result, message: '2FA required' });
+  }
+
+  res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+  sendSuccess(res, { data: { user: result.user, accessToken: result.accessToken }, message: 'Login successful' });
+});
+
+/**
+ * POST /api/v1/auth/verify-admin-2fa
+ */
+const verifyAdmin2FA = asyncHandler(async (req, res) => {
+  const { email, code } = req.validatedBody;
+  const { user, accessToken, refreshToken } = await authService.verifyAdmin2FA({ email, code });
 
   res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
-  sendSuccess(res, { data: { user, accessToken }, message: 'Login successful' });
+  sendSuccess(res, { data: { user, accessToken }, message: 'Admin login successful' });
 });
 
 /**
@@ -92,4 +107,4 @@ const resetPassword = asyncHandler(async (req, res) => {
   sendSuccess(res, { message: 'Password reset successfully. Please log in.' });
 });
 
-module.exports = { register, login, refreshToken, logout, sendOTP, verifyOTP, forgotPassword, resetPassword };
+module.exports = { register, login, verifyAdmin2FA, refreshToken, logout, sendOTP, verifyOTP, forgotPassword, resetPassword };

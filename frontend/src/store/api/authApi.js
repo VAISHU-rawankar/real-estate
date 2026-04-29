@@ -13,6 +13,17 @@ export const authApi = baseApi.injectEndpoints({
     login: builder.mutation({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (!data.data.require2FA) {
+            dispatch(setCredentials({ user: data.data.user, accessToken: data.data.accessToken }));
+          }
+        } catch {}
+      },
+    }),
+    verifyAdmin2FA: builder.mutation({
+      query: (body) => ({ url: '/auth/verify-admin-2fa', method: 'POST', body }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
         dispatch(setCredentials({ user: data.data.user, accessToken: data.data.accessToken }));
       },
@@ -50,6 +61,7 @@ export const authApi = baseApi.injectEndpoints({
 export const {
   useRegisterMutation,
   useLoginMutation,
+  useVerifyAdmin2FAMutation,
   useLogoutMutation,
   useRefreshTokenMutation,
   useSendOTPMutation,

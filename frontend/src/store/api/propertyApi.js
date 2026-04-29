@@ -26,6 +26,10 @@ export const propertyApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/admin/properties', params }),
       providesTags: ['Property'],
     }),
+    getAdminPropertyById: builder.query({
+      query: (id) => `/admin/properties/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Property', id }],
+    }),
     createProperty: builder.mutation({
       query: (body) => ({ url: '/admin/properties', method: 'POST', body }),
       invalidatesTags: ['Property'],
@@ -68,6 +72,7 @@ export const {
   useGetRelatedPropertiesQuery,
   useGetPropertySuggestionsQuery,
   useGetAdminPropertiesQuery,
+  useGetAdminPropertyByIdQuery,
   useCreatePropertyMutation,
   useUpdatePropertyMutation,
   useDeletePropertyMutation,
