@@ -35,8 +35,9 @@ async function connectDB() {
 async function attemptConnection(uri) {
   try {
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 10000, // Increase to 10s
+      socketTimeoutMS: 60000,         // Increase to 60s
+      heartbeatFrequencyMS: 10000,    // Keep the connection alive
       family: 4,
       maxPoolSize: 10,
       minPoolSize: 2,
