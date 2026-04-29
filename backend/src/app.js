@@ -18,13 +18,6 @@ const router = require('./routes');
 
 const app = express();
 
-app.use((req, res, next) => {
-  const fs = require('fs');
-  const path = require('path');
-  fs.appendFileSync(path.join(__dirname, '../request_trace.log'), `[${new Date().toISOString()}] ${req.method} ${req.url}\n`);
-  next();
-});
-
 // ─── Security Headers ─────────────────────────────────────────────────────────
 app.use(
   helmet({
