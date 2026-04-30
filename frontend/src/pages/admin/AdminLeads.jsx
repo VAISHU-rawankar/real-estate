@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { 
@@ -11,6 +11,7 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { useGetAdminLeadsQuery } from '@store/api/adminApi';
+import useDebounce from '@hooks/useDebounce';
 
 const STATUS_COLORS = {
   new: 'bg-amber-50 text-amber-600 border-amber-100',
@@ -22,7 +23,12 @@ const STATUS_COLORS = {
 };
 
 export default function AdminLeads() {
-  const { data, isLoading } = useGetAdminLeadsQuery({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  const { data, isLoading } = useGetAdminLeadsQuery({ 
+    search: debouncedSearch 
+  });
   const leads = data?.data || [];
 
   return (
@@ -48,6 +54,8 @@ export default function AdminLeads() {
             <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input 
               type="text" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search leads by name, email or phone..." 
               className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-100 rounded-2xl text-[14px] outline-none focus:ring-2 focus:ring-[#D4A853] shadow-sm transition-all"
             />
@@ -85,7 +93,7 @@ export default function AdminLeads() {
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-[12px] font-bold text-gray-500">
-                            {lead.name[0]}
+                            {lead.name ? lead.name[0] : '?'}
                           </div>
                           <div>
                             <p className="text-[14px] font-bold text-[#111111]">{lead.name}</p>

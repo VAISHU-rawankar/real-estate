@@ -16,7 +16,7 @@ import {
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
 
-const COLORS = ['#D4A853', '#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+const COLORS = ['#7C5CFF', '#EF4444', '#A78BFA', '#FCA5A5', '#4C1D95', '#B91C1C'];
 
 function AnalyticCard({ title, icon: Icon, children }) {
   return (
@@ -41,7 +41,7 @@ export default function AdminAnalytics() {
 
   if (leadLoading || statsLoading) return (
     <div className="h-[400px] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-[#D4A853] border-t-transparent rounded-full animate-spin" />
+      <div className="w-12 h-12 border-4 border-[#7C5CFF] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -92,7 +92,7 @@ export default function AdminAnalytics() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="_id" type="category" tick={{ fontSize: 11, fontWeight: 600, fill: '#9CA3AF' }} width={80} />
                   <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="count" fill="#D4A853" radius={[0, 4, 4, 0]} barSize={24} />
+                  <Bar dataKey="count" fill="#7C5CFF" radius={[0, 4, 4, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -123,18 +123,18 @@ export default function AdminAnalytics() {
           <AnalyticCard title="Lead Acquisition Trend" icon={ArrowTrendingUpIcon}>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={leadAnalytics.trend || []} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <AreaChart data={leadAnalytics.dailyTrend || []} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#D4A853" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#D4A853" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#7C5CFF" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#7C5CFF" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
                   <XAxis dataKey="_id" tick={{ fontSize: 10, fontWeight: 600, fill: '#9CA3AF' }} axisLine={false} tickLine={false} dy={10} />
                   <YAxis tick={{ fontSize: 10, fontWeight: 600, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                  <Area type="monotone" dataKey="count" stroke="#D4A853" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" dot={{ r: 4, fill: '#fff', stroke: '#D4A853', strokeWidth: 2 }} />
+                  <Area type="monotone" dataKey="count" stroke="#7C5CFF" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" dot={{ r: 4, fill: '#fff', stroke: '#7C5CFF', strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

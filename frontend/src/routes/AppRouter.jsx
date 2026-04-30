@@ -5,6 +5,7 @@ import ErrorBoundary from '@components/common/ErrorBoundary';
 import PublicLayout from '@/layouts/PublicLayout';
 import AuthLayout from '@/layouts/AuthLayout';
 import AdminLayout from '@/layouts/AdminLayout';
+import UserDashboardLayout from '@/layouts/UserDashboardLayout';
 import ProtectedRoutes from './ProtectedRoutes';
 import AdminRoutes from './AdminRoutes';
 import ScrollToTop from '@components/common/ScrollToTop';
@@ -82,11 +83,16 @@ const router = createBrowserRouter([
         path: '/dashboard',
         element: <ProtectedRoutes />,
         children: [
-          { index: true, element: <Suspense fallback={<SuspenseFallback />}><UserDashboardPage /></Suspense> },
-          { path: 'shortlist', element: <Suspense fallback={<SuspenseFallback />}><ShortlistPage /></Suspense> },
-          { path: 'enquiries', element: <Suspense fallback={<SuspenseFallback />}><MyEnquiriesPage /></Suspense> },
-          { path: 'alerts', element: <Suspense fallback={<SuspenseFallback />}><SearchAlertsPage /></Suspense> },
-          { path: 'profile', element: <Suspense fallback={<SuspenseFallback />}><ProfilePage /></Suspense> },
+          {
+            element: <UserDashboardLayout />,
+            children: [
+              { index: true, element: <Suspense fallback={<SuspenseFallback />}><UserDashboardPage /></Suspense> },
+              { path: 'shortlist', element: <Suspense fallback={<SuspenseFallback />}><ShortlistPage /></Suspense> },
+              { path: 'enquiries', element: <Suspense fallback={<SuspenseFallback />}><MyEnquiriesPage /></Suspense> },
+              { path: 'alerts', element: <Suspense fallback={<SuspenseFallback />}><SearchAlertsPage /></Suspense> },
+              { path: 'profile', element: <Suspense fallback={<SuspenseFallback />}><ProfilePage /></Suspense> },
+            ]
+          }
         ],
       },
       {

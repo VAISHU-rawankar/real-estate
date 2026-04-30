@@ -8,9 +8,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { selectIsAuthenticated, selectCurrentUser, logout as authLogout } from '@store/slices/authSlice';
-import { selectShortlistCount } from '@store/slices/shortlistSlice';
+import { selectShortlistCount, syncShortlist } from '@store/slices/shortlistSlice';
 import { toggleMobileMenu, selectIsMobileMenuOpen } from '@store/slices/uiSlice';
 import { useLogoutMutation } from '@store/api/authApi';
+import { useGetShortlistQuery } from '@store/api/userApi';
 
 const NAV_LINKS = [
   { label: 'Properties', href: '/properties' },
@@ -24,12 +25,22 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
-  const shortlistCount = useSelector(selectShortlistCount);
+  const localShortlistCount = useSelector(selectShortlistCount);
   const mobileMenuOpen = useSelector(selectIsMobileMenuOpen);
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
+
+  // Fetch shortlist from API if authenticated
+  const { data: apiShortlist } = useGetShortlistQuery(undefined, { skip: !isAuthenticated });
+
+  useEffect(() => {
+    if (apiShortlist?.data) {
+      const ids = apiShortlist.data.map(item => item.property?._id).filter(Boolean);
+      dispatch(syncShortlist(ids));
+    }
+  }, [apiShortlist, dispatch]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
@@ -48,6 +59,8 @@ export default function Navbar() {
       navigate('/');
     }
   };
+
+  const shortlistCount = localShortlistCount;
 
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white border-b border-gray-100 ${scrolled ? 'shadow-sm' : ''}`} style={{ height: '80px' }}>
@@ -75,11 +88,11 @@ export default function Navbar() {
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 sm:gap-5">
           {/* Wishlist */}
           <Link
             to={isAuthenticated ? '/dashboard/shortlist' : '/auth/login'}
-            className="text-[#111111] hover:scale-110 transition-transform relative hidden sm:block"
+            className="text-[#111111] hover:scale-110 transition-transform relative hidden sm:flex items-center justify-center w-10 h-10"
           >
             {shortlistCount > 0 ? (
               <HeartSolid className="w-5 h-5 text-red-500" />
@@ -87,7 +100,7 @@ export default function Navbar() {
               <HeartIcon className="w-5 h-5" />
             )}
             {shortlistCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full" />
+              <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white" />
             )}
           </Link>
 
@@ -131,7 +144,8 @@ export default function Navbar() {
                       <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
                     </div>
                     {[
-                      { label: 'Dashboard', href: '/dashboard' },
+                      { label: 'User Dashboard', href: '/dashboard' },
+                      ...(user?.role === 'admin' ? [{ label: 'Admin Panel', href: '/admin' }] : []),
                       { label: 'My Inquiries', href: '/dashboard/enquiries' },
                       { label: 'Profile Settings', href: '/dashboard/profile' },
                     ].map((item) => (
@@ -139,7 +153,11 @@ export default function Navbar() {
                         key={item.href}
                         to={item.href}
                         onClick={() => setUserMenuOpen(false)}
-                        className="block px-5 py-3 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-[#111111] transition-colors"
+                        className={`block px-5 py-3 text-[13px] font-medium transition-colors ${
+                          item.label === 'Admin Panel' 
+                            ? 'text-[#7C5CFF] bg-purple-50/50 hover:bg-purple-50' 
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-[#111111]'
+                        }`}
                       >
                         {item.label}
                       </Link>
@@ -202,4 +220,4 @@ export default function Navbar() {
       </AnimatePresence>
     </header>
   );
-}
+}

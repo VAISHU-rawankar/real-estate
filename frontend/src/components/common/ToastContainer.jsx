@@ -11,7 +11,7 @@ const ICONS = {
   info: { icon: InformationCircleIcon, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200' },
 };
 
-function Toast({ toast }) {
+const Toast = React.forwardRef(({ toast }, ref) => {
   const dispatch = useDispatch();
   const { icon: Icon, color, bg, border } = ICONS[toast.type] || ICONS.info;
 
@@ -22,6 +22,7 @@ function Toast({ toast }) {
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, x: 100, scale: 0.9 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -39,7 +40,7 @@ function Toast({ toast }) {
       </button>
     </motion.div>
   );
-}
+});
 
 export default function ToastContainer() {
   const toasts = useSelector(selectToasts);

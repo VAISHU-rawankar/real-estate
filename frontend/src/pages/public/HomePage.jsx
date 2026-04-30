@@ -89,20 +89,36 @@ const WHY_US = [
   { icon: PhoneIcon, title: '24/7 Expert Support', desc: 'Dedicated relationship managers assist you at every step from search to registration.' },
 ];
 
+// Constant mappings for filters and sorts
+const EXPLORE_CATEGORY_FILTERS = {
+  'All Listings': {},
+  'Apartments': { propertySubType: 'apartment' },
+  'Luxury': { isFeatured: true },
+  'Villas': { propertySubType: 'villa' },
+  'Commercial': { propertyType: 'commercial' },
+  'Newly-built': { ageOfProperty: 'new' },
+  'Rentals': { listingType: 'rent' },
+  'Residential': { propertyType: 'residential' },
+  'Land & Plots': { propertyType: 'plot' }
+};
+
+const RECENT_CATEGORY_FILTERS = {
+  'All': {},
+  'Residential': { propertyType: 'residential' },
+  'Commercial': { propertyType: 'commercial' },
+  'Plots': { propertyType: 'plot' }
+};
+
+const RECENT_SORT_MAPPING = {
+  'Newest First': 'newest',
+  'Price: Low to High': 'price-asc',
+  'Price: High to Low': 'price-desc'
+};
+
 export default function HomePage() {
   const { data: featuredData, isLoading: featuredLoading } = useGetFeaturedPropertiesQuery(12);
   const featuredPropertiesRaw = featuredData?.data || [];
   const featuredProperties = [...featuredPropertiesRaw].sort((a, b) => {
-    const aHasImg = a.images && a.images.length > 0 && a.images[0]?.url;
-    const bHasImg = b.images && b.images.length > 0 && b.images[0]?.url;
-    if (aHasImg && !bHasImg) return -1;
-    if (!aHasImg && bHasImg) return 1;
-    return 0;
-  });
-
-  const { data: recentData, isLoading: recentLoading } = useGetPropertiesQuery({ sort: '-createdAt', limit: 6 });
-  const recentPropertiesRaw = recentData?.data || [];
-  const recentProperties = [...recentPropertiesRaw].sort((a, b) => {
     const aHasImg = a.images && a.images.length > 0 && a.images[0]?.url;
     const bHasImg = b.images && b.images.length > 0 && b.images[0]?.url;
     if (aHasImg && !bHasImg) return -1;
@@ -119,6 +135,23 @@ export default function HomePage() {
   const [recentSort, setRecentSort] = useState('Newest First');
   const [searchPropType, setSearchPropType] = useState('');
 
+  // Dynamic Queries with memoized params
+  const exploreParams = React.useMemo(() => ({
+    ...EXPLORE_CATEGORY_FILTERS[selectedCategory],
+    limit: 4,
+    sort: 'newest'
+  }), [selectedCategory]);
+
+  const { data: exploreData, isLoading: exploreLoading } = useGetPropertiesQuery(exploreParams);
+
+  const recentParams = React.useMemo(() => ({
+    ...RECENT_CATEGORY_FILTERS[recentCategory],
+    sort: RECENT_SORT_MAPPING[recentSort],
+    limit: 6
+  }), [recentCategory, recentSort]);
+
+  const { data: recentSectionData, isLoading: recentSectionLoading } = useGetPropertiesQuery(recentParams);
+
   const handleHeroSearch = (e) => {
     e.preventDefault();
     let query = `?listingType=${searchType}`;
@@ -127,16 +160,14 @@ export default function HomePage() {
     navigate(`/properties${query}`);
   };
 
-  // Testimonial Hooks Cleaned
-
   return (
     <div className="bg-[#FAF8F5] text-[#1A1A1A] font-sans antialiased overflow-x-hidden">
       <Helmet>
         <title>NestQuest — Find Your Dream Home</title>
         <meta name="description" content="Welcome to NestQuest, where luxury meets lifestyle. Search for the perfect home that suits your budget." />
       </Helmet>      {/* ─── Hero Section (First Fold) ─────────────────────────────────── */}
-      <section className="bg-white px-4 sm:px-6 lg:px-12 pt-5 md:pt-7 pb-4 md:pb-6">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-14 mb-10">
+      <section className="bg-white pt-2 md:pt-4 pb-4 md:pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-14 mb-6">
           {/* Left: Massive Heading */}
           <div className="lg:flex-[1.2]">
             <h1 className="text-[42px] sm:text-[54px] lg:text-[72px] font-display font-semibold tracking-tight leading-[0.95] text-[#111111] uppercase">
@@ -217,7 +248,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Image Container */}
-        <div className="max-w-7xl mx-auto relative px-0 -mt-4">
+        <div className="max-w-7xl mx-auto relative px-0">
           <div className="relative rounded-[40px] overflow-hidden min-h-[300px] lg:h-[480px] border border-gray-50 shadow-2xl">
             <img 
               src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
@@ -229,17 +260,17 @@ export default function HomePage() {
       </section>
 
       {/* ─── Second Fold: Explore & Discover Section ────────────────────────────── */}
-      <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-[#FAF8F5]/30">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-4 md:pt-6 pb-8 md:pb-10 bg-[#FAF8F5]/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           {/* Top Row: Heading and Description */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-4 h-4 text-[#7C5CFF] font-semibold">⊞</span>
                 <span className="text-[#7C5CFF] text-xxs font-semibold tracking-wider uppercase">HANDPICKED LISTINGS</span>
               </div>
               <h2 className="text-3xl sm:text-[44px] font-display font-semibold text-[#1A1A1A] leading-[1.1] uppercase">
-                Explore Apartments and <br /> Homes for Sale
+                Explore Apartments and Homes for Sale
               </h2>
               <p className="text-gray-400 text-xs font-semibold mt-2">Discover premium properties in the best locations.</p>
             </div>
@@ -258,24 +289,25 @@ export default function HomePage() {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex flex-wrap gap-2.5 mb-12 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex flex-wrap gap-2.5 mb-4 overflow-x-auto pb-2 scrollbar-none">
             {[
-              { label: 'All Listings' },
-              { label: 'Apartments' },
-              { label: 'Luxury' },
-              { label: 'Villas' },
-              { label: 'Commercial' },
-              { label: 'Newly-built' },
-              { label: 'Rentals' },
-              { label: 'Residential' },
-              { label: 'Land & Plots' },
-              { label: 'Filters' },
+              { label: 'All Listings', filter: {} },
+              { label: 'Apartments', filter: { propertySubType: 'apartment' } },
+              { label: 'Luxury', filter: { isFeatured: true } },
+              { label: 'Villas', filter: { propertySubType: 'villa' } },
+              { label: 'Commercial', filter: { propertyType: 'commercial' } },
+              { label: 'Newly-built', filter: { ageOfProperty: 'new' } },
+              { label: 'Rentals', filter: { listingType: 'rent' } },
+              { label: 'Residential', filter: { propertyType: 'residential' } },
+              { label: 'Land & Plots', filter: { propertyType: 'plot' } },
             ].map((pill) => {
               const isSel = selectedCategory === pill.label;
               return (
                 <button
                   key={pill.label}
-                  onClick={() => setSelectedCategory(pill.label)}
+                  onClick={() => {
+                    setSelectedCategory(pill.label);
+                  }}
                   className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap border ${
                     isSel 
                       ? 'bg-[#7C5CFF] text-white border-transparent shadow-md shadow-[#7C5CFF]/20' 
@@ -288,97 +320,29 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* 4 Blocks in One Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {(() => {
-              const blocks = [
-                {
-                  id: 2,
-                  title: "2BHK Home in Juhu",
-                  price: "₹2.26 Cr",
-                  location: "Juhu, Mumbai",
-                  sqft: "2201 sqft",
-                  bhk: "2 BHK",
-                  bath: "2 Bath",
-                  tag: "SALE",
-                  image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800"
-                },
-                {
-                  id: 3,
-                  title: "3BHK Apartment in Baner",
-                  price: "₹1.85 Cr",
-                  location: "Baner, Pune",
-                  sqft: "1800 sqft",
-                  bhk: "3 BHK",
-                  bath: "3 Bath",
-                  tag: "SALE",
-                  image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800"
-                },
-                {
-                  id: 4,
-                  title: "Villa in Whitefield",
-                  price: "₹3.45 Cr",
-                  location: "Whitefield, Bangalore",
-                  sqft: "1800 sqft",
-                  bhk: "4 BHK",
-                  bath: "4 Bath",
-                  tag: "SALE",
-                  image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=600"
-                },
-                {
-                  id: 5,
-                  title: "Studio Flat in Gachibowli",
-                  price: "₹3.47 Cr",
-                  location: "Gachibowli, Hyderabad",
-                  sqft: "1036 sqft",
-                  bhk: "1 BHK",
-                  bath: "1 Bath",
-                  tag: "SALE",
-                  image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600"
-                }
-              ];
-
-              return blocks.map((item) => (
-                <div key={item.id} className="rounded-[24px] overflow-hidden group shadow-sm bg-white border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
-                  <div className="h-[160px] relative overflow-hidden flex-shrink-0">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute top-3 left-3 bg-[#FEF3C7] text-[#92400E] text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
-                      {item.tag}
-                    </div>
-                    <button className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all shadow-sm">
-                      <HeartIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="p-5 flex flex-col justify-between flex-1 text-[#1A1A1A]">
-                    <div>
-                      <span className="text-xl font-display font-semibold leading-tight text-[#1A1A1A]">
-                        {item.price}
-                      </span>
-                      <h3 className="text-sm font-bold truncate mt-1 text-gray-800">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-1.5 font-medium truncate">
-                        <span>📍</span>
-                        <span>{item.location}</span>
-                      </p>
-                    </div>
-                    <div className="border-t border-gray-100 pt-3 mt-4 flex items-center text-xs text-gray-400 font-semibold justify-between">
-                      <span>{item.sqft}</span>
-                      <span>{item.bhk}</span>
-                    </div>
-                  </div>
-                </div>
-              ));
-            })()}
-            </div>
+          {/* Dynamic Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {exploreLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <PropertyCardSkeleton key={i} />)
+            ) : exploreData?.data?.length === 0 ? (
+              <div className="col-span-full py-20 text-center bg-white rounded-[24px] border border-dashed border-gray-200">
+                <BuildingOfficeIcon className="w-10 h-10 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-400 font-medium">No {selectedCategory.toLowerCase()} available at the moment.</p>
+              </div>
+            ) : (
+              exploreData?.data?.map((p, i) => (
+                <PropertyCard key={p._id} property={p} index={i} />
+              ))
+            )}
           </div>
-        </section>
+        </div>
+      </section>
 
 
 
       {/* ─── Stats Section ──────────────────────────────────────────── */}
-      <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="rounded-[30px] overflow-hidden h-[400px]">
             <img 
               src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070" 
@@ -410,8 +374,8 @@ export default function HomePage() {
       </section>
 
       {/* ─── Categories Section ───────────────────────────────────────── */}
-      <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="py-10 md:py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Column: Search & Messaging */}
           <div className="lg:col-span-5 flex flex-col items-start text-left">
@@ -551,9 +515,8 @@ export default function HomePage() {
 
 
       {/* ─── Recently Added Listings Section ────────────────────────── */}
-      <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-white relative overflow-hidden">
-
-        <div className="max-w-7xl mx-auto bg-[#0B0B0F] rounded-2xl p-2 sm:p-4 border border-[#1F1F2A] shadow-2xl relative z-10">
+      <section className="py-10 md:py-12 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 bg-[#0B0B0F] rounded-2xl p-2 sm:p-4 border border-[#1F1F2A] shadow-2xl relative z-10">
           
           {/* Upper Split Hero Block */}
           <div className="relative w-full rounded-2xl overflow-hidden min-h-[210px] flex items-center mb-6 border border-white/5 group shadow-inner">
@@ -640,120 +603,56 @@ export default function HomePage() {
 
           {/* Listings Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
-            {(() => {
-              const staticProperties = [
-                {
-                  id: 1,
-                  title: "4BHK Flat in Jubilee Hills",
-                  price: "₹45.00 L",
-                  location: "Jubilee Hills, Hyderabad",
-                  sqft: "2360 sqft",
-                  bhk: "3 Bath",
-                  type: "Sale",
-                  image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600",
-                  cat: "Residential"
-                },
-                {
-                  id: 2,
-                  title: "3BHK Flat in Janakpuri",
-                  price: "₹90.00 L / month",
-                  location: "Janakpuri, Delhi",
-                  sqft: "710 sqft",
-                  bhk: "1 Bath",
-                  type: "Rent",
-                  image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600",
-                  cat: "Residential"
-                },
-                {
-                  id: 3,
-                  title: "4BHK Flat in HSR Layout",
-                  price: "₹1.08 Cr",
-                  location: "HSR Layout, Bangalore",
-                  sqft: "1639 sqft",
-                  bhk: "2 Bath",
-                  type: "Lease",
-                  image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=600",
-                  cat: "Residential"
-                },
-                {
-                  id: 4,
-                  title: "2BHK Villa in Porur",
-                  price: "₹1.71 Cr",
-                  location: "Porur, Chennai",
-                  sqft: "1680 sqft",
-                  bhk: "3 Bath",
-                  type: "Sale",
-                  image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=600",
-                  cat: "Residential"
-                },
-                {
-                  id: 5,
-                  title: "2BHK Flat in Kondapur",
-                  price: "₹1.71 Cr",
-                  location: "Kondapur, Hyderabad",
-                  sqft: "2112 sqft",
-                  bhk: "2 Bath",
-                  type: "Sale",
-                  image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600",
-                  cat: "Residential"
-                },
-                {
-                  id: 6,
-                  title: "4BHK Home in Velachery",
-                  price: "₹1.72 Cr",
-                  location: "Velachery, Chennai",
-                  sqft: "603 sqft",
-                  bhk: "2 Bath",
-                  type: "Sale",
-                  image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600",
-                  cat: "Residential"
-                }
-              ];
-
-              let filtered = [...staticProperties].filter(p => {
-                if (recentCategory === 'All') return true;
-                return p.cat === recentCategory;
-              });
-
-              return filtered.map((p) => (
-                <div 
-                  key={p.id} 
+            {recentSectionLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white/5 rounded-[20px] h-[240px] animate-pulse border border-white/5" />
+              ))
+            ) : recentSectionData?.data?.length === 0 ? (
+              <div className="col-span-full py-10 text-center text-gray-500 italic">
+                No recent listings found for this category.
+              </div>
+            ) : (
+              recentSectionData?.data?.map((p) => (
+                <Link 
+                  key={p._id} 
+                  to={`/properties/${p.slug}`}
                   className="bg-white rounded-[20px] overflow-hidden shadow-xl flex flex-col border border-gray-100 hover:-translate-y-2 hover:shadow-2xl group transition-all duration-500"
                 >
                   {/* Top half: Image */}
                   <div className="h-[120px] relative overflow-hidden">
-                    <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img 
+                      src={p.images?.[0]?.url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600'} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      alt="" 
+                    />
                     <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
-                      {p.type}
+                      {p.listingType}
                     </div>
-                    <button className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-white transition-all duration-300 shadow-sm">
-                      <HeartIcon className="w-3.5 h-3.5" />
-                    </button>
                   </div>
 
                   {/* Bottom half: Content */}
                   <div className="p-3.5 flex flex-col flex-1 justify-between text-[#0B0B0F]">
                     <div>
                       <span className="text-sm font-display font-semibold leading-tight text-[#0B0B0F] group-hover:text-[#7C5CFF] transition-colors duration-300">
-                        {p.price}
+                        {p.formattedPrice || `₹${p.price?.toLocaleString('en-IN')}`}
                       </span>
                       <h3 className="text-[10px] font-bold truncate mt-1 text-[#1A1A1A]">
                         {p.title}
                       </h3>
                       <p className="text-[9px] text-gray-500 flex items-center gap-1 mt-1 font-medium truncate">
                         <span className="text-[#7C5CFF]">📍</span>
-                        <span>{p.location}</span>
+                        <span>{p.location?.city || 'India'}</span>
                       </p>
                     </div>
 
                     <div className="border-t border-gray-100 pt-2 mt-3 flex items-center text-[9px] text-gray-600 font-semibold justify-between">
-                      <span>{p.sqft}</span>
-                      <span>{p.bhk}</span>
+                      <span>{p.carpetArea ? `${p.carpetArea} sqft` : '—'}</span>
+                      <span>{p.bhkConfig || p.propertyType}</span>
                     </div>
                   </div>
-                </div>
-              ));
-            })()}
+                </Link>
+              ))
+            )}
           </div>
 
         </div>
@@ -762,8 +661,8 @@ export default function HomePage() {
 
 
       {/* ─── Expert Services Section ────────────────────────────────── */}
-      <section className="px-4 sm:px-6 lg:px-12 py-10 md:py-12 bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-10 md:py-12 bg-[#FAF8F5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           {/* Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
             <h2 className="text-4xl sm:text-5xl font-display font-semibold text-[#1A1A1A] leading-tight max-w-4xl uppercase tracking-tight">
@@ -891,7 +790,7 @@ export default function HomePage() {
           }
         `}</style>
 
-        <div className="max-w-7xl mx-auto px-4 text-center mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-center mb-16">
           <div className="inline-flex items-center bg-[#FAF8F5] border border-[#EAE6DF] rounded-full px-5 py-1.5 text-xs font-bold text-[#1A1A1A] mb-4 shadow-sm">
             They already love our products 😍
           </div>

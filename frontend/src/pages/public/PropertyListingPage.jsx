@@ -1,36 +1,63 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { AdjustmentsHorizontalIcon, Squares2X2Icon, ListBulletIcon, FunnelIcon, MapIcon } from '@heroicons/react/24/outline';
+import { 
+  AdjustmentsHorizontalIcon, 
+  MagnifyingGlassIcon, 
+  MapPinIcon, 
+  ChevronDownIcon,
+  ArrowRightIcon,
+  ArrowPathIcon,
+  AdjustmentsVerticalIcon,
+  BuildingOfficeIcon,
+  HomeIcon
+} from '@heroicons/react/24/outline';
 import { useGetPropertiesQuery } from '@store/api/propertyApi';
 import PropertyCard from '@components/property/PropertyCard';
+import PropertyHero from '@components/property/PropertyHero';
 import PropertyCardSkeleton from '@components/property/PropertyCardSkeleton';
-import { selectFilters, setFilter, clearFilter, clearAllFilters, setPage, setViewMode, setFiltersFromURL, selectActiveFilterCount, clearCompare, removeFromCompare } from '@store/slices/searchSlice';
-import { toggleFilterDrawer } from '@store/slices/uiSlice';
+import { 
+  selectFilters, 
+  setFilter, 
+  clearFilter, 
+  clearAllFilters, 
+  setPage, 
+  setFiltersFromURL, 
+  selectActiveFilterCount 
+} from '@store/slices/searchSlice';
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest First' },
   { value: 'price-asc', label: 'Price: Low to High' },
   { value: 'price-desc', label: 'Price: High to Low' },
-  { value: 'most-viewed', label: 'Most Popular' },
+];
+
+const CATEGORIES = [
+  { label: 'All Listings', key: 'propertyType', value: '', icon: AdjustmentsVerticalIcon },
+  { label: 'Apartments', key: 'propertySubType', value: 'apartment', icon: BuildingOfficeIcon },
+  { label: 'Villas', key: 'propertySubType', value: 'villa', icon: HomeIcon },
+  { label: 'Commercial', key: 'propertyType', value: 'commercial', icon: BuildingOfficeIcon },
+  { label: 'Residential', key: 'propertyType', value: 'residential', icon: HomeIcon },
+  { label: 'Land & Plots', key: 'propertyType', value: 'plot', icon: MapPinIcon },
 ];
 
 export default function PropertyListingPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const filters = useSelector(selectFilters);
   const activeFilterCount = useSelector(selectActiveFilterCount);
+  
+  const [localLocation, setLocalLocation] = useState(filters.city || '');
 
-  // Sync URL → Redux on mount
   useEffect(() => {
     const urlFilters = {};
     for (const [key, value] of searchParams.entries()) {
       urlFilters[key] = value;
     }
     dispatch(setFiltersFromURL(urlFilters));
-  }, []);
+  }, [searchParams, dispatch]);
 
   const queryParams = {
     ...Object.fromEntries(
@@ -43,243 +70,202 @@ export default function PropertyListingPage() {
   const meta = data?.meta || {};
   const loading = isLoading || isFetching;
 
-  const handleSortChange = (e) => {
-    dispatch(setFilter({ key: 'sort', value: e.target.value }));
-  };
-
-  const handlePageChange = (page) => {
-    dispatch(setPage(page));
+  const handleApplyFilters = () => {
+    dispatch(setFilter({ key: 'city', value: localLocation }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <>
       <Helmet>
-        <title>Properties — Browse All Listings | RealEstate</title>
-        <meta name="description" content="Browse thousands of verified properties. Filter by location, type, price, and amenities." />
+        <title>Properties — Handpicked Listings | RealEstate</title>
+        <meta name="description" content="Browse our handpicked collection of verified properties." />
       </Helmet>
 
-      <div className="page-container py-8">
-        {/* Top Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-4 h-4 text-[#7C5CFF] font-semibold">✦</span>
-              <span className="text-[#7C5CFF] text-[10px] font-semibold tracking-wider uppercase">HANDPICKED LISTINGS</span>
-            </div>
-            <h1 className="text-3xl sm:text-[44px] font-display font-semibold text-[#1A1A1A] leading-[1.1]">
-              Explore Apartments and <br /> Homes for Sale
-            </h1>
-            <p className="text-gray-400 text-xs font-semibold mt-2">Discover premium properties in the best locations.</p>
-          </div>
-          <div className="flex flex-col md:items-end gap-3">
-            <p className="text-[#666666] text-xs max-w-xs md:text-right font-medium leading-relaxed">
-              Each listing offers exceptional quality, unique features, and prime locations.
-            </p>
-            <button 
-              onClick={() => dispatch(clearAllFilters())}
-              className="inline-flex items-center gap-2 bg-[#13131A] hover:bg-[#1A1A24] text-white font-bold text-xs px-6 py-3 rounded-full transition-all duration-300 shadow-md"
-            >
-              <span>View All Properties</span>
-              <span className="text-white">→</span>
-            </button>
-          </div>
-        </div>
+      <PropertyHero />
 
-        {/* 1st Filter Row: Buy/Rent toggle, Search, All Types, Filters box */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 bg-white border border-[#EAE6DF] rounded-[24px] p-4 shadow-sm items-center">
-          {/* Buy/Rent Toggle */}
-          <div className="flex bg-[#FAF8F5] border border-[#EAE6DF] rounded-full p-1 w-full md:w-auto">
-            <button 
-              onClick={() => dispatch(setFilter({ key: 'listingType', value: 'sale' }))}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-200 ${filters.listingType === 'sale' ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-[#666666] hover:text-[#1A1A1A]'}`}
-            >
-              Buy
-            </button>
-            <button 
-              onClick={() => dispatch(setFilter({ key: 'listingType', value: 'rent' }))}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-200 ${filters.listingType === 'rent' ? 'bg-[#1A1A1A] text-white shadow-sm' : 'text-[#666666] hover:text-[#1A1A1A]'}`}
-            >
-              Rent
-            </button>
-          </div>
-
-          {/* Search Input */}
-          <div className="flex items-center gap-2 border border-[#EAE6DF] rounded-full px-4 py-2 flex-1 w-full bg-[#FAF8F5]/30">
-            <span className="text-[#666666]">🔍</span>
-            <input 
-              type="text" 
-              placeholder="City or locality..." 
-              value={filters.city || ''}
-              onChange={(e) => dispatch(setFilter({ key: 'city', value: e.target.value }))}
-              className="bg-transparent text-xs font-semibold text-[#1A1A1A] placeholder-gray-400 focus:outline-none w-full"
-            />
-          </div>
-
-          {/* All Types Dropdown */}
-          <select 
-            value={filters.propertyType || ''}
-            onChange={(e) => dispatch(setFilter({ key: 'propertyType', value: e.target.value }))}
-            className="border border-[#EAE6DF] bg-white rounded-full px-6 py-3 text-xs font-bold text-[#1A1A1A] focus:outline-none cursor-pointer w-full md:w-48 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%231A1A1A%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_1.5rem_center] bg-no-repeat"
-          >
-            <option value="">All Types</option>
-            <option value="apartment">Apartments</option>
-            <option value="villa">Villas</option>
-            <option value="commercial">Commercial</option>
-            <option value="land">Land & Plots</option>
-          </select>
-
-          {/* Filter Drawer Toggle (Black square) */}
-          <button 
-            onClick={() => dispatch(toggleFilterDrawer())}
-            className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white p-3 rounded-2xl flex items-center justify-center transition-colors flex-shrink-0"
-          >
-            <AdjustmentsHorizontalIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* 2nd Filter Row: Pill Tabs */}
-        <div className="flex flex-wrap gap-2.5 mb-12 overflow-x-auto pb-2 scrollbar-none">
-          {[
-            { label: 'All Listings', value: '' },
-            { label: 'Apartments', value: 'apartment' },
-            { label: 'Villas', value: 'villa' },
-            { label: 'Commercial', value: 'commercial' },
-            { label: 'Residential', value: 'residential' },
-            { label: 'Land & Plots', value: 'land' },
-          ].map((pill) => {
-            const isSel = filters.propertyType === pill.value;
-            return (
-              <button
-                key={pill.label}
-                onClick={() => dispatch(setFilter({ key: 'propertyType', value: pill.value }))}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap border flex items-center gap-2 ${
-                  isSel 
-                    ? 'bg-[#1A1A1A] text-white border-transparent shadow-sm' 
-                    : 'bg-white text-[#666666] border-[#EAE6DF] hover:border-gray-300 hover:text-[#1A1A1A]'
-                }`}
-              >
-                <span>{pill.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Active Filters Chips */}
-        {activeFilterCount > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6 items-center">
-            <span className="text-xs font-semibold text-[#666666] mr-1">Active Filters:</span>
-            {Object.entries(filters).map(([key, value]) => {
-              if (!value || ['viewMode', 'page', 'sort', 'compareList'].includes(key)) return null;
-              if (Array.isArray(value) && value.length === 0) return null;
-              if (value === false) return null;
-              
-              const label = Array.isArray(value) ? value.join(', ') : value.toString();
-              const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-
-              return (
-                <span 
-                  key={key} 
-                  className="inline-flex items-center gap-1.5 bg-[#FAF8F5] border border-[#EAE6DF] px-3 py-1 rounded-full text-xs font-medium text-[#1A1A1A]"
-                >
-                  <span className="text-gray-400">{formattedKey}:</span> {label}
-                  <button 
-                    onClick={() => dispatch(clearFilter(key))}
-                    className="text-gray-400 hover:text-red-500 font-bold ml-1 text-sm"
-                  >
-                    ×
-                  </button>
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 12 }).map((_, i) => <PropertyCardSkeleton key={i} />)}
-          </div>
-        ) : properties.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="text-6xl mb-4">🏠</div>
-            <h3 className="text-xl font-display font-semibold text-navy-900 mb-2">No Properties Found</h3>
-            <p className="text-slate-400 max-w-sm">Try adjusting your filters or search in a different area.</p>
-          </div>
-        ) : filters.viewMode === 'map' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px] items-stretch">
-            {/* Left side cards */}
-            <div className="lg:col-span-4 flex flex-col gap-4 max-h-[700px] overflow-y-auto pr-2 scrollbar-none">
-              {properties.map((p, i) => (
-                <PropertyCard key={p._id} property={p} index={i} />
-              ))}
-            </div>
+      <div className="bg-white min-h-screen pb-20 pt-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+          
+          {/* ─── Main Content Grid (Sidebar + List) ────────────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             
-            {/* Right side Google Maps iframe */}
-            <div className="lg:col-span-8 rounded-[32px] overflow-hidden border border-[#EAE6DF] h-[500px] lg:h-full min-h-[500px] relative">
-              <iframe 
-                title="Property Map View"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d224345.83611311093!2d77.06889754716766!3d28.527218141019057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347eb62d%3A0x52c2b7494e204dce!2sNew%20Delhi%2C%20Delhi!5e0!3m2!1sen!2sin!4v1714418641951!5m2!1sen!2sin" 
-                className="absolute inset-0 w-full h-full border-0"
-                allowFullScreen="" 
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+            {/* Left Side: Property Cards */}
+            <div className="lg:col-span-9 order-2 lg:order-1">
+              <div className="flex justify-between items-center mb-8">
+                <p className="text-[14px] font-bold text-[#111111]">
+                  <span className="text-[#7C5CFF]">{meta.total || properties.length}+</span> Properties Found
+                </p>
+                <div className="flex items-center gap-4">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Sort by:</span>
+                  <div className="relative">
+                    <select 
+                      value={filters.sort || 'newest'}
+                      onChange={(e) => dispatch(setFilter({ key: 'sort', value: e.target.value }))}
+                      className="appearance-none bg-white border border-gray-100 rounded-2xl px-6 py-2.5 pr-10 text-[12px] font-bold text-[#111111] outline-none shadow-sm focus:border-gray-200"
+                    >
+                      {SORT_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    </select>
+                    <ChevronDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {[1,2,3,4,5,6].map(i => <PropertyCardSkeleton key={i} />)}
+                </div>
+              ) : properties.length === 0 ? (
+                <div className="bg-white rounded-[40px] p-24 text-center border border-gray-50 shadow-sm">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <MagnifyingGlassIcon className="w-8 h-8 text-gray-200" />
+                  </div>
+                  <h3 className="text-xl font-display font-bold text-[#111111] mb-2 uppercase">No properties found</h3>
+                  <p className="text-gray-400 font-medium max-w-xs mx-auto">Try adjusting your filters to find more properties matching your criteria.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                  {properties.map((p, i) => (
+                    <PropertyCard key={p._id || i} property={p} index={i} />
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              {meta.pages > 1 && (
+                <div className="flex justify-center items-center gap-3 mt-16">
+                   <button className="w-12 h-12 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#111111] hover:text-[#111111] transition-all shadow-sm">
+                     ←
+                   </button>
+                   {[1,2,3,4,5,6,7,8,9,10].slice(0, meta.pages).map(p => (
+                     <button 
+                       key={p} 
+                       onClick={() => dispatch(setPage(p))}
+                       className={`w-12 h-12 rounded-full font-bold text-[13px] transition-all ${p === meta.page ? 'bg-[#4F46E5] text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-200 shadow-sm'}`}
+                     >
+                       {p}
+                     </button>
+                   ))}
+                   <button className="w-12 h-12 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:border-[#111111] hover:text-[#111111] transition-all shadow-sm">
+                     →
+                   </button>
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-3 order-1 lg:order-2 space-y-4 lg:sticky lg:top-24">
+              <div className="bg-[#111111] rounded-[24px] p-4 shadow-2xl">
+                <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2.5">
+                  <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.1em]">Filters</h2>
+                  <button 
+                    onClick={() => dispatch(clearAllFilters())}
+                    className="text-[9px] font-bold text-gray-500 uppercase hover:text-white transition-colors tracking-widest"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Location Filter */}
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Location</label>
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        placeholder="City..." 
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-1.5 text-[11px] font-medium text-white placeholder:text-gray-600 outline-none focus:bg-white/10 transition-all"
+                        value={localLocation}
+                        onChange={(e) => setLocalLocation(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Property Type Filter */}
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Type</label>
+                    <div className="relative">
+                      <select 
+                        value={filters.propertyType || ''}
+                        onChange={(e) => dispatch(setFilter({ key: 'propertyType', value: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-1.5 text-[10px] font-bold text-white outline-none appearance-none cursor-pointer focus:bg-white/10 transition-all uppercase tracking-wider"
+                      >
+                        <option value="" className="bg-[#111111]">All Types</option>
+                        <option value="apartment" className="bg-[#111111]">Apartments</option>
+                        <option value="villa" className="bg-[#111111]">Villas</option>
+                        <option value="commercial" className="bg-[#111111]">Commercial</option>
+                      </select>
+                      <ChevronDownIcon className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Budget</label>
+                    <div className="px-1">
+                      <div className="h-0.5 bg-white/10 rounded-full relative">
+                        <div className="absolute left-0 right-0 h-full bg-white rounded-full" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-md cursor-pointer" />
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-md cursor-pointer" />
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                      <span>₹20 L</span>
+                      <span>₹5 Cr+</span>
+                    </div>
+                  </div>
+
+                  {/* Rooms Filters */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Beds</label>
+                      <div className="relative">
+                        <select className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-1.5 text-[10px] font-bold text-white outline-none appearance-none cursor-pointer focus:bg-white/10">
+                          <option className="bg-[#111111]">Any</option>
+                          <option className="bg-[#111111]">1+</option>
+                          <option className="bg-[#111111]">2+</option>
+                        </select>
+                        <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Baths</label>
+                      <div className="relative">
+                        <select className="w-full bg-white/5 border border-white/10 rounded-lg px-3.5 py-1.5 text-[10px] font-bold text-white outline-none appearance-none cursor-pointer focus:bg-white/10">
+                          <option className="bg-[#111111]">Any</option>
+                          <option className="bg-[#111111]">1+</option>
+                        </select>
+                        <ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleApplyFilters}
+                    className="w-full bg-white hover:bg-gray-100 text-[#111111] font-bold py-2 rounded-lg transition-all text-[10px] uppercase tracking-widest active:scale-95"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
+              </div>
+
+              {/* Promo Card */}
+              <div className="bg-[#111111] rounded-[24px] p-5 text-white relative overflow-hidden shadow-2xl group cursor-pointer aspect-square lg:aspect-auto h-52">
+                <div className="absolute inset-0 opacity-40 group-hover:scale-110 transition-transform duration-1000">
+                  <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070" className="w-full h-full object-cover" alt="" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                
+                <div className="relative z-10 flex flex-col h-full justify-end">
+                  <h3 className="text-lg font-display font-bold mb-1.5 uppercase tracking-tight">Rentals</h3>
+                  <p className="text-gray-400 text-[10px] font-medium leading-relaxed mb-4 line-clamp-2">Expert rental support for your next home.</p>
+                  <button className="bg-white text-[#111111] font-bold text-[9px] px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-100 transition-all w-fit uppercase tracking-wider group-hover:gap-4">
+                    Explore <ArrowRightIcon className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        ) : (
-          <motion.div
-            className={`grid gap-6 ${
-              filters.viewMode === 'list'
-                ? 'grid-cols-1'
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-            }`}
-          >
-            {properties.map((p, i) => (
-              <PropertyCard key={p._id} property={p} index={i} />
-            ))}
-          </motion.div>
-        )}
-
-        {/* Pagination */}
-        {meta.pages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-10">
-            {Array.from({ length: Math.min(meta.pages, 10) }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-full text-xs font-bold transition-all duration-300 flex items-center justify-center border ${
-                  page === filters.page
-                    ? 'bg-[#1A1A1A] text-white border-transparent shadow-md'
-                    : 'bg-white text-[#666666] border-[#EAE6DF] hover:border-[#1A1A1A] hover:text-[#1A1A1A]'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-        )}
-        {/* Floating Compare Bar */}
-        {filters.compareList && filters.compareList.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-white px-6 py-4 rounded-full shadow-2xl z-50 flex items-center gap-6 border border-white/10 backdrop-blur-md">
-            <span className="text-xs font-bold tracking-wide">
-              {filters.compareList.length} / 4 Properties Selected
-            </span>
-            <div className="h-4 w-px bg-white/20" />
-            <Link 
-              to={`/compare?ids=${filters.compareList.join(',')}`}
-              className="bg-[#7C5CFF] hover:bg-[#6D28D9] text-white text-xs font-bold px-4 py-2 rounded-full transition-all"
-            >
-              Compare Now
-            </Link>
-            <button 
-              onClick={() => dispatch(clearCompare())}
-              className="text-xs text-gray-400 hover:text-white"
-            >
-              Clear
-            </button>
-          </div>
-        )}
+        </div>
       </div>
     </>
   );

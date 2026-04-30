@@ -8,8 +8,8 @@ const leadService = require('../../services/lead.service');
  * GET /api/v1/admin/leads
  */
 const getLeads = asyncHandler(async (req, res) => {
-  const { status, source, property, dateFrom, dateTo, ...query } = req.query;
-  const { leads, meta } = await leadService.getLeads({ status, source, property, dateFrom, dateTo }, query);
+  const { status, source, property, dateFrom, dateTo, search, ...query } = req.query;
+  const { leads, meta } = await leadService.getLeads({ status, source, property, dateFrom, dateTo, search }, query);
   sendSuccess(res, { data: leads, meta });
 });
 

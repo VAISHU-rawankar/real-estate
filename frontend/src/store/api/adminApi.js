@@ -16,7 +16,7 @@ export const adminApi = baseApi.injectEndpoints({
       query: (params) => ({ url: '/admin/leads', params }),
       providesTags: ['Lead'],
     }),
-    getLeadById: builder.query({
+    getAdminLeadById: builder.query({
       query: (id) => `/admin/leads/${id}`,
       providesTags: (r, e, id) => [{ type: 'Lead', id }],
     }),
@@ -39,7 +39,7 @@ export const {
   useGetLeadChartDataQuery,
   useGetRecentActivityQuery,
   useGetAdminLeadsQuery,
-  useGetLeadByIdQuery,
+  useGetAdminLeadByIdQuery,
   useUpdateLeadStatusMutation,
   useAddLeadNoteMutation,
   useGetLeadAnalyticsQuery,

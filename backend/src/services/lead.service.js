@@ -121,6 +121,16 @@ function buildLeadQuery(filters) {
     if (filters.dateFrom) q.createdAt.$gte = new Date(filters.dateFrom);
     if (filters.dateTo) q.createdAt.$lte = new Date(filters.dateTo);
   }
+  
+  if (filters.search) {
+    const regex = new RegExp(filters.search, 'i');
+    q.$or = [
+      { name: regex },
+      { email: regex },
+      { phone: regex }
+    ];
+  }
+  
   return q;
 }
 

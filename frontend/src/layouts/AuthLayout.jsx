@@ -1,10 +1,11 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
+import ToastContainer from '@components/common/ToastContainer';
 
 export default function AuthLayout() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] font-sans antialiased flex items-center justify-center p-4">
+      <ToastContainer />
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
