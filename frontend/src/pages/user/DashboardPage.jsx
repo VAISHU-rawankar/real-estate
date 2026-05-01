@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { 
   HeartIcon, 
   ClipboardDocumentListIcon, 
@@ -14,12 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@store/slices/authSlice';
-
-const STATS = [
-  { id: 1, label: 'Saved Properties', value: 12, icon: HeartIcon, color: 'text-rose-500', bg: 'bg-rose-50' },
-  { id: 2, label: 'My Enquiries', value: 5, icon: ClipboardDocumentListIcon, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 3, label: 'Active Alerts', value: 3, icon: BellIcon, color: 'text-[#7C5CFF]', bg: 'bg-[#7C5CFF]/10' },
-];
+import { useGetShortlistQuery, useGetMyEnquiriesQuery, useGetAlertsQuery } from '@store/api/userApi';
 
 const RECENTLY_VIEWED = [
   { id: 1, title: 'Luxury 3BHK Apartment', location: 'Koramangala, Bengaluru', price: '₹1.25 Cr', type: 'FOR SALE', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400', beds: 3, baths: 3, sqft: 1800 },
@@ -28,19 +24,23 @@ const RECENTLY_VIEWED = [
   { id: 4, title: 'Urban Studio Flat', location: 'Electronic City, Bengaluru', price: '₹32,000 /mo', type: 'FOR RENT', image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=400', beds: 1, baths: 1, sqft: 650 },
 ];
 
-const ENQUIRIES = [
-  { id: 1, title: 'Luxury 3BHK Apartment', location: 'Koramangala, Bengaluru', status: 'New', statusColor: 'bg-[#7C5CFF]', date: '20 Apr 2025', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=100' },
-  { id: 2, title: 'Modern Villa with Pool', location: 'Whitefield, Bengaluru', status: 'Viewed', statusColor: 'bg-blue-500', date: '18 Apr 2025', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=100' },
-  { id: 3, title: 'Premium 2BHK Apartment', location: 'HSR Layout, Bengaluru', status: 'Responded', statusColor: 'bg-green-500', date: '15 Apr 2025', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=100' },
-];
-
-const ALERTS = [
-  { id: 1, type: '3 BHK in Sarjapur Road', budget: '₹60L - 1.2 Cr', tag: 'Buy', count: 12, icon: '🏢' },
-  { id: 2, type: '2 BHK in Whitefield', budget: '₹20K - 40K', tag: 'Rent', count: 8, icon: '🏠' },
-];
-
 export default function DashboardPage() {
-  const user = useSelector(selectCurrentUser) || { name: 'Harshada Patil' };
+  const user = useSelector(selectCurrentUser) || { name: 'User' };
+  
+  // Real Data Queries
+  const { data: shortlistData, isLoading: loadingShortlist } = useGetShortlistQuery();
+  const { data: enquiriesData, isLoading: loadingEnquiries } = useGetMyEnquiriesQuery();
+  const { data: alertsData, isLoading: loadingAlerts } = useGetAlertsQuery();
+
+  const shortlistCount = shortlistData?.data?.length || 0;
+  const enquiries = enquiriesData?.data || [];
+  const alerts = alertsData?.data || [];
+
+  const STATS = [
+    { id: 1, label: 'Saved Properties', value: shortlistCount, icon: HeartIcon, color: 'text-rose-500', bg: 'bg-rose-50', path: '/dashboard/shortlist' },
+    { id: 2, label: 'My Enquiries', value: enquiries.length, icon: ClipboardDocumentListIcon, color: 'text-blue-500', bg: 'bg-blue-50', path: '/dashboard/enquiries' },
+    { id: 3, label: 'Active Alerts', value: alerts.length, icon: BellIcon, color: 'text-[#7C5CFF]', bg: 'bg-[#7C5CFF]/10', path: '/dashboard/alerts' },
+  ];
 
   return (
     <>
@@ -75,15 +75,17 @@ export default function DashboardPage() {
                   <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center`}>
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <button className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">View all</button>
+                  <Link to={stat.path} className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">View all</Link>
                 </div>
-                <p className="text-3xl font-display font-bold text-[#111111] mb-1">{stat.value}</p>
+                <p className="text-3xl font-display font-bold text-[#111111] mb-1">
+                  {loadingShortlist || loadingEnquiries || loadingAlerts ? '...' : stat.value}
+                </p>
                 <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
               </motion.div>
             ))}
           </div>
 
-          {/* Recently Viewed */}
+          {/* Recently Viewed (Still mock, but UI preserved) */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Recently Viewed</h2>
@@ -165,62 +167,64 @@ export default function DashboardPage() {
           {/* My Enquiries Panel */}
           <div className="bg-white rounded-[32px] p-8 shadow-sm">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">My Enquiries</h2>
-              <button className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</button>
+              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Recent Enquiries</h2>
+              <Link to="/dashboard/enquiries" className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</Link>
             </div>
 
             <div className="space-y-6 mb-8">
-              {ENQUIRIES.map((enq) => (
-                <div key={enq.id} className="flex gap-4 group cursor-pointer">
-                  <img src={enq.image} className="w-16 h-16 rounded-2xl object-cover shadow-sm" alt="" />
+              {enquiries.slice(0, 3).map((enq) => (
+                <Link to={`/properties/${enq.property?.slug}`} key={enq._id} className="flex gap-4 group cursor-pointer">
+                  <img src={enq.property?.images?.[0]?.url || 'https://via.placeholder.com/100'} className="w-16 h-16 rounded-2xl object-cover shadow-sm" alt="" />
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
-                      <h3 className="text-[14px] font-bold text-[#111111] truncate">{enq.title}</h3>
-                      <span className={`${enq.statusColor} text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest`}>{enq.status}</span>
+                      <h3 className="text-[14px] font-bold text-[#111111] truncate">{enq.property?.title}</h3>
+                      <span className={`bg-[#7C5CFF] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest`}>{enq.status}</span>
                     </div>
-                    <p className="text-[11px] text-gray-400 font-medium truncate mb-1">{enq.location}</p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Enquired on {enq.date}</p>
+                    <p className="text-[11px] text-gray-400 font-medium truncate mb-1">{enq.property?.location?.city}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Enquired on {new Date(enq.createdAt).toLocaleDateString()}</p>
                   </div>
-                </div>
+                </Link>
               ))}
+              {enquiries.length === 0 && (
+                <p className="text-sm text-gray-400 py-4 text-center">No recent enquiries</p>
+              )}
             </div>
 
-            <button className="w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
+            <Link to="/dashboard/enquiries" className="block w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest text-center hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
               Go to My Enquiries
-            </button>
+            </Link>
           </div>
 
           {/* Active Alerts Panel */}
           <div className="bg-white rounded-[32px] p-8 shadow-sm">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Active Alerts</h2>
-              <button className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</button>
+              <Link to="/dashboard/alerts" className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</Link>
             </div>
 
             <div className="space-y-4 mb-8">
-              {ALERTS.map((alert) => (
-                <div key={alert.id} className="p-5 border border-gray-50 rounded-2xl hover:bg-gray-50 transition-all group">
+              {alerts.slice(0, 2).map((alert) => (
+                <div key={alert._id} className="p-5 border border-gray-50 rounded-2xl hover:bg-gray-50 transition-all group">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">{alert.icon}</div>
+                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">🏠</div>
                       <div>
-                        <h4 className="text-[13px] font-bold text-[#111111]">{alert.type}</h4>
-                        <p className="text-[11px] text-gray-500 font-medium">{alert.budget} • {alert.tag}</p>
+                        <h4 className="text-[13px] font-bold text-[#111111]">{alert.name}</h4>
+                        <p className="text-[11px] text-gray-500 font-medium">{alert.filters?.city} • {alert.filters?.propertyType}</p>
                       </div>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-black transition-all"><PencilSquareIcon className="w-4 h-4" /></button>
-                      <button className="p-1.5 hover:bg-white rounded-lg text-gray-400 hover:text-black transition-all"><EllipsisVerticalIcon className="w-4 h-4" /></button>
-                    </div>
                   </div>
-                  <p className="text-[11px] font-bold text-[#7C5CFF] uppercase tracking-widest">{alert.count} new properties</p>
+                  <p className="text-[11px] font-bold text-[#7C5CFF] uppercase tracking-widest">Created {new Date(alert.createdAt).toLocaleDateString()}</p>
                 </div>
               ))}
+              {alerts.length === 0 && (
+                <p className="text-sm text-gray-400 py-4 text-center">No active alerts</p>
+              )}
             </div>
 
-            <button className="w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
+            <Link to="/dashboard/alerts" className="block w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest text-center hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
               Manage Alerts
-            </button>
+            </Link>
           </div>
         </div>
       </div>
