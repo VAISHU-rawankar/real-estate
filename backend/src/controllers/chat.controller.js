@@ -6,9 +6,51 @@ const fs = require('fs');
 const asyncHandler = require('../utils/asyncHandler');
 const { sendError } = require('../utils/apiResponse');
 
+// ─── Simple in-memory response cache ─────────────────────────────────────────
+const responseCache = new Map();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
+function getCacheKey(message, role) {
+  return `${role}::${message.toLowerCase().trim()}`;
+}
+
+function getFromCache(key) {
+  const entry = responseCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    responseCache.delete(key);
+    return null;
+  }
+  return entry.text;
+}
+
+function setCache(key, text) {
+  // Keep cache under 500 entries
+  if (responseCache.size >= 500) {
+    const firstKey = responseCache.keys().next().value;
+    responseCache.delete(firstKey);
+  }
+  responseCache.set(key, { text, timestamp: Date.now() });
+}
+
+// ─── Retry with exponential backoff ──────────────────────────────────────────
+async function callWithRetry(fn, retries = 3, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const is429 = error.message && error.message.includes('429');
+      if (!is429 || i === retries - 1) throw error;
+      console.warn(`[CHAT] 429 rate limit hit — retrying in ${delay}ms (attempt ${i + 1}/${retries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2; // exponential backoff
+    }
+  }
+}
+
 exports.handleChat = asyncHandler(async (req, res, next) => {
   const apiKey = process.env.GEMINI_API_KEY;
-  console.log('[CHAT DEBUG] Using API Key (masked):', apiKey ? `${apiKey.substring(0, 8)}...` : 'MISSING');
+  console.log('[CHAT DEBUG] API Key configured:', !!apiKey);
   
   if (!apiKey) {
     return sendError(res, { status: 500, message: 'GEMINI_API_KEY is not configured', code: 'CONFIG_ERROR' });
@@ -16,17 +58,23 @@ exports.handleChat = asyncHandler(async (req, res, next) => {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const { message, history, role: bodyRole } = req.body;
-  console.log('[CHAT DEBUG] Incoming Message:', message);
-  console.log('[CHAT DEBUG] Detected Role:', bodyRole);
+  console.log('[CHAT DEBUG] Message:', message, '| Role:', bodyRole);
 
   if (!message) {
     return sendError(res, { status: 400, message: 'Message is required', code: 'VALIDATION_ERROR' });
   }
 
   let role = bodyRole || 'guest';
-  // Fallback to token if role not explicitly provided in body
   if (!bodyRole && req.user) {
     role = req.user.role === 'admin' ? 'admin' : (req.user.role === 'agent' ? 'agent' : 'user');
+  }
+
+  // ─── Check cache first ──────────────────────────────────────────────────────
+  const cacheKey = getCacheKey(message, role);
+  const cached = getFromCache(cacheKey);
+  if (cached) {
+    console.log('[CHAT] Cache HIT for:', cacheKey);
+    return res.status(200).json({ success: true, data: { text: cached, roleDetected: role, cached: true } });
   }
 
   let knowledgeBaseContext = '';
@@ -73,44 +121,48 @@ ${knowledgeBaseContext}
 
   const chatHistory = [];
   if (history && Array.isArray(history)) {
-    // We need to ensure alternating user/model roles. 
-    // If a message is an error, we replace it with a neutral acknowledgement to maintain the chain.
     history.forEach(msg => {
-      const isError = msg.text && msg.text.includes('Sorry, I encountered an error');
+      const isError = msg.text && (msg.text.includes('Error:') || msg.text.includes('quota'));
       chatHistory.push({
         role: msg.role === 'ai' ? 'model' : 'user',
-        parts: [{ text: isError ? "I had a temporary connection issue. Please continue." : msg.text }]
+        parts: [{ text: isError ? "I had a temporary issue. Please continue." : msg.text }]
       });
     });
   }
 
-  // Final check: history must end with a 'model' role for the next sendMessage (user) to be valid
-  // If history is empty, that's fine. If it ends with 'user', we add a dummy model response.
   if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'user') {
-    chatHistory.push({
-      role: 'model',
-      parts: [{ text: "Understood. Please go ahead." }]
-    });
+    chatHistory.push({ role: 'model', parts: [{ text: "Understood. Please go ahead." }] });
   }
 
-  const chat = model.startChat({
-    history: chatHistory,
-  });
+  const chat = model.startChat({ history: chatHistory });
 
   try {
-    const result = await chat.sendMessage(message);
-    const responseText = result.response.text();
+    const responseText = await callWithRetry(async () => {
+      const result = await chat.sendMessage(message);
+      return result.response.text();
+    });
+
     console.log('[CHAT DEBUG] Success response generated');
+    setCache(cacheKey, responseText);
 
     res.status(200).json({
       success: true,
-      data: {
-        text: responseText,
-        roleDetected: role
-      }
+      data: { text: responseText, roleDetected: role }
     });
   } catch (error) {
     console.error('[CHAT ERROR] Gemini API Failure:', error.message);
+    
+    // Handle quota error gracefully
+    if (error.message && error.message.includes('429')) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          text: "🙏 I'm experiencing high demand right now and have temporarily reached my daily limit. Please try again in a few minutes or come back tomorrow.\n\nMeanwhile, you can:\n- Browse our [Properties](/properties) directly\n- [Contact us](/contact) for assistance\n\n[ACTION: View Properties][ACTION: Contact Us]",
+          roleDetected: role
+        }
+      });
+    }
+
     return sendError(res, { 
       status: 500, 
       message: `AI Error: ${error.message}`, 
