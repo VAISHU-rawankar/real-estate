@@ -24,6 +24,7 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { useGetFeaturedPropertiesQuery, useGetPropertiesQuery } from '@store/api/propertyApi';
+import { useGetCmsContentQuery } from '@store/api/cmsApi';
 import PropertyCard from '@components/property/PropertyCard';
 import HeroSearch from '@components/search/HeroSearch';
 import PropertyCardSkeleton from '@components/property/PropertyCardSkeleton';
@@ -135,6 +136,11 @@ export default function HomePage() {
   const [recentSort, setRecentSort] = useState('Newest First');
   const [searchPropType, setSearchPropType] = useState('');
 
+  // Fetch CMS Content
+  const { data: cmsDataRaw } = useGetCmsContentQuery('home');
+  const cmsContent = cmsDataRaw?.data?.home || {};
+  const heroContent = cmsContent?.hero?.content || {};
+
   // Dynamic Queries with memoized params
   const exploreParams = React.useMemo(() => ({
     ...EXPLORE_CATEGORY_FILTERS[selectedCategory],
@@ -170,15 +176,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-14 mb-6">
           {/* Left: Massive Heading */}
           <div className="lg:flex-[1.2]">
-            <h1 className="text-[42px] sm:text-[54px] lg:text-[72px] font-display font-semibold tracking-tight leading-[0.95] text-[#111111] uppercase">
-              Find Your <br /> Perfect Home
-            </h1>
+            <h1 className="text-[42px] sm:text-[54px] lg:text-[72px] font-display font-semibold tracking-tight leading-[0.95] text-[#111111] uppercase" dangerouslySetInnerHTML={{ __html: heroContent.title || 'Find Your <br /> Perfect Home' }} />
           </div>
 
           {/* Right: Integrated Search Unit */}
           <div className="lg:flex-[0.8] flex flex-col gap-4">
             <p className="text-[#666666] text-[15px] leading-relaxed max-w-md">
-              We offer over 10,000 apartments for every request. You are guaranteed to be able to find an apartment that suits you.
+              {heroContent.description || 'We offer over 10,000 apartments for every request. You are guaranteed to be able to find an apartment that suits you.'}
             </p>
             
             <div className="flex flex-col gap-1.5">
@@ -251,7 +255,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto relative px-0">
           <div className="relative rounded-[40px] overflow-hidden min-h-[300px] lg:h-[480px] border border-gray-50 shadow-2xl">
             <img 
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
+              src={heroContent.imageUrl || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070"} 
               alt="Luxury modern architectural residence" 
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
             />

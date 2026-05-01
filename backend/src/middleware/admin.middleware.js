@@ -3,12 +3,13 @@
 const { sendError } = require('../utils/apiResponse');
 const ActivityLog = require('../models/ActivityLog.model');
 const logger = require('../utils/logger');
+const asyncHandler = require('../utils/asyncHandler');
 
 /**
  * requireAdmin — must run AFTER requireAuth.
  * Checks req.user.role === 'admin'. Logs access attempt.
  */
-const requireAdmin = async (req, res, next) => {
+const requireAdmin = asyncHandler(async (req, res, next) => {
   if (!req.user) {
     return sendError(res, { status: 401, message: 'Authentication required', code: 'UNAUTHORIZED' });
   }
@@ -19,13 +20,13 @@ const requireAdmin = async (req, res, next) => {
   }
 
   next();
-};
+});
 
 /**
  * requireChannelPartner — must run AFTER requireAuth.
  * Allows admins and channelPartners.
  */
-const requireChannelPartner = (req, res, next) => {
+const requireChannelPartner = asyncHandler((req, res, next) => {
   if (!req.user) {
     return sendError(res, { status: 401, message: 'Authentication required', code: 'UNAUTHORIZED' });
   }
@@ -35,7 +36,7 @@ const requireChannelPartner = (req, res, next) => {
   }
 
   next();
-};
+});
 
 /**
  * logAdminAction — middleware factory to log an admin action to ActivityLog.

@@ -27,6 +27,16 @@ export default function LoginPage() {
         navigate(`/auth/verify-otp?email=${encodeURIComponent(email)}`, { replace: true });
       } else {
         dispatch(showToast({ type: 'success', message: 'Welcome back!' }));
+        
+        // Redirect based on role if no returnUrl
+        if (!searchParams.get('returnUrl')) {
+          const user = res?.data?.user;
+          if (user?.role === 'admin') {
+            navigate('/admin', { replace: true });
+            return;
+          }
+        }
+        
         navigate(returnUrl, { replace: true });
       }
     } catch (err) {

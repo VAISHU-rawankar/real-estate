@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import ChatWidget from '../chat/ChatWidget';
 
 export default function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [pathname]);
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <ChatWidget />
+    </>
+  );
 }

@@ -5,7 +5,7 @@ import { selectCurrentUser, logout as authLogout } from '@store/slices/authSlice
 import {
   HomeIcon, BuildingOfficeIcon, UsersIcon, ChartBarIcon,
   Bars3Icon, BellIcon, ArrowRightOnRectangleIcon,
-  ChevronDownIcon, CalendarIcon
+  ChevronDownIcon, CalendarIcon, DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useLogoutMutation } from '@store/api/authApi';
 import ToastContainer from '@components/common/ToastContainer';
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { label: 'Properties', href: '/admin/properties', icon: BuildingOfficeIcon },
   { label: 'Leads', href: '/admin/leads', icon: UsersIcon },
   { label: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
+  { label: 'CMS', href: '/admin/cms', icon: DocumentTextIcon },
 ];
 
 export default function AdminLayout() {

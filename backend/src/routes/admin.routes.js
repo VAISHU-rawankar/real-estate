@@ -5,9 +5,9 @@ const router = express.Router();
 const propertyCtrl = require('../controllers/admin/admin.property.controller');
 const dashboardCtrl = require('../controllers/admin/admin.dashboard.controller');
 const leadCtrl = require('../controllers/admin/admin.lead.controller');
+const cmsCtrl = require('../controllers/admin/cms.controller');
 const { uploadMultiple } = require('../middleware/upload.middleware');
 const { logAdminAction } = require('../middleware/admin.middleware');
-
 // Dashboard
 router.get('/dashboard/stats', dashboardCtrl.getDashboardStats);
 router.get('/dashboard/chart/leads', dashboardCtrl.getLeadChartData);
@@ -32,5 +32,8 @@ router.get('/leads', leadCtrl.getLeads);
 router.get('/leads/:id', leadCtrl.getLeadById);
 router.patch('/leads/:id/status', logAdminAction('Updated lead status', 'lead'), leadCtrl.updateLeadStatus);
 router.patch('/leads/:id/notes', leadCtrl.addLeadNote);
+
+// CMS
+router.put('/cms/:page/:section', logAdminAction('Updated CMS content', 'cms'), cmsCtrl.updateSectionContent);
 
 module.exports = router;

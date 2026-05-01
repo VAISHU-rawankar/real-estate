@@ -1,0 +1,35 @@
+{
+  "platform": {
+    "name": "RealEstate Pro",
+    "description": "A modern web application for searching, buying, and renting properties.",
+    "features": ["Property Search", "Shortlist", "Agent Contact", "Lead Management", "CMS Editing"]
+  },
+  "faqs": [
+    {
+      "question": "How do I search for properties?",
+      "answer": "You can search for properties by navigating to the Properties page. You can filter by location, budget, and property type (like 1BHK, 2BHK, Villa).",
+      "action": "[ACTION: View Properties]"
+    },
+    {
+      "question": "How can I contact an agent?",
+      "answer": "Once you find a property you like, click on it to view details. You will find an option to Contact Agent on the property details page.",
+      "action": "[ACTION: View Properties]"
+    },
+    {
+      "question": "How do I add a new property?",
+      "answer": "If you are an agent or admin, navigate to your Dashboard, go to the Properties section, and click on 'Create Property' to fill out the listing details.",
+      "action": "[ACTION: Add Property]"
+    },
+    {
+      "question": "How to edit the homepage?",
+      "answer": "If you are an admin, navigate to the Admin Dashboard, click on 'CMS' in the sidebar, and you can edit the homepage hero sections, images, and SEO settings.",
+      "action": "[ACTION: Admin Dashboard]"
+    }
+  ],
+  "roles": {
+    "guest": "Can view properties and basic pages. Needs to login for full access.",
+    "user": "Can save properties to shortlist, contact agents, and view search alerts.",
+    "agent": "Can list properties, view leads, and manage inquiries.",
+    "admin": "Has full access to manage the platform, users, properties, leads, and CMS."
+  }
+}

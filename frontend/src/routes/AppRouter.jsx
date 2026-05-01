@@ -43,6 +43,7 @@ const AdminPropertyEdit = lazy(() => import('@pages/admin/AdminPropertyEdit'));
 const AdminLeads = lazy(() => import('@pages/admin/AdminLeads'));
 const AdminLeadDetail = lazy(() => import('@pages/admin/AdminLeadDetail'));
 const AdminAnalytics = lazy(() => import('@pages/admin/AdminAnalytics'));
+const AdminCms = lazy(() => import('@pages/admin/AdminCms'));
 
 const SuspenseFallback = () => <LoadingPage />;
 
@@ -106,6 +107,7 @@ const router = createBrowserRouter([
           { path: 'leads', element: <Suspense fallback={<SuspenseFallback />}><AdminLeads /></Suspense> },
           { path: 'leads/:id', element: <Suspense fallback={<SuspenseFallback />}><AdminLeadDetail /></Suspense> },
           { path: 'analytics', element: <Suspense fallback={<SuspenseFallback />}><AdminAnalytics /></Suspense> },
+          { path: 'cms', element: <Suspense fallback={<SuspenseFallback />}><AdminCms /></Suspense> },
         ],
       },
       { path: '*', element: <Suspense fallback={<SuspenseFallback />}><NotFoundPage /></Suspense> },

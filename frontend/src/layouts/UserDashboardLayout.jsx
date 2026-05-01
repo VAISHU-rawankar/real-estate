@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   HomeIcon, 
   HeartIcon, 
@@ -11,10 +12,13 @@ import {
   Cog6ToothIcon,
   MagnifyingGlassIcon,
   QuestionMarkCircleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '@store/slices/authSlice';
+import { selectCurrentUser, logout as authLogout } from '@store/slices/authSlice';
+import { useLogoutMutation } from '@store/api/authApi';
+import ToastContainer from '@components/common/ToastContainer';
+import { useSyncShortlist } from '@hooks/useSyncShortlist';
 
 const SIDEBAR_MENU = [
   { name: 'Dashboard', icon: HomeIcon, path: '/dashboard' },
@@ -28,7 +32,22 @@ const SIDEBAR_MENU = [
 
 export default function UserDashboardLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [logoutApi] = useLogoutMutation();
   const user = useSelector(selectCurrentUser) || { name: 'Harshada Patil', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200' };
+  useSyncShortlist();
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi().unwrap();
+    } catch (err) {
+      console.warn('Backend logout failed, forcing local logout');
+    } finally {
+      dispatch(authLogout());
+      navigate('/auth/login');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F7F9] flex font-sans">
@@ -69,7 +88,7 @@ export default function UserDashboardLayout() {
 
         {/* Upgrade Card */}
         <div className="p-6">
-          <div className="bg-[#111111] rounded-3xl p-6 relative overflow-hidden group cursor-pointer">
+          <div className="bg-[#111111] rounded-3xl p-6 relative overflow-hidden group cursor-pointer mb-4">
             <div className="absolute top-0 right-0 w-24 h-24 bg-[#7C5CFF]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700" />
             <p className="text-white font-bold text-[14px] mb-1 relative z-10">Upgrade Your Experience</p>
             <p className="text-gray-400 text-[11px] mb-4 relative z-10 font-medium">Get early access to premium properties and exclusive deals.</p>
@@ -77,6 +96,13 @@ export default function UserDashboardLayout() {
               Go Premium
             </button>
           </div>
+          <button 
+            onClick={handleLogout} 
+            className="flex items-center justify-center gap-3 w-full px-6 py-3 text-rose-500 hover:text-rose-400 hover:bg-rose-50 transition-colors group font-bold text-[13px] tracking-wide uppercase rounded-xl border border-rose-100"
+          >
+            <ArrowRightOnRectangleIcon className="w-5 h-5 rotate-180" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -113,6 +139,7 @@ export default function UserDashboardLayout() {
           <Outlet />
         </div>
       </main>
+      <ToastContainer />
     </div>
   );
 }
