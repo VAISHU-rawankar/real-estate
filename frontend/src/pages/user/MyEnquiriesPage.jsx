@@ -14,11 +14,12 @@ import {
 } from '@heroicons/react/24/outline';
 
 const STATUS_STYLES = {
-  new:       { label: 'New',        bg: 'bg-blue-50',   text: 'text-blue-600',   dot: 'bg-blue-500' },
-  contacted: { label: 'Contacted',  bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' },
-  qualified: { label: 'Qualified',  bg: 'bg-purple-50', text: 'text-purple-600', dot: 'bg-purple-500' },
-  closed:    { label: 'Closed',     bg: 'bg-green-50',  text: 'text-green-600',  dot: 'bg-green-500' },
-  rejected:  { label: 'Rejected',   bg: 'bg-red-50',    text: 'text-red-600',    dot: 'bg-red-500' },
+  new:                    { label: 'New',        bg: 'bg-blue-50',     text: 'text-blue-600',   dot: 'bg-blue-500' },
+  contacted:              { label: 'Contacted',  bg: 'bg-yellow-50',   text: 'text-yellow-700', dot: 'bg-yellow-500' },
+  interested:             { label: 'Interested', bg: 'bg-purple-50',   text: 'text-purple-600', dot: 'bg-purple-500' },
+  'site-visit-scheduled': { label: 'Visit',      bg: 'bg-indigo-50',   text: 'text-indigo-600', dot: 'bg-indigo-500' },
+  closed:                 { label: 'Closed',     bg: 'bg-green-50',    text: 'text-green-600',  dot: 'bg-green-500' },
+  lost:                   { label: 'Lost',       bg: 'bg-red-50',      text: 'text-red-600',    dot: 'bg-red-500' },
 };
 
 function StatusBadge({ status }) {
@@ -109,7 +110,7 @@ function EnquiryCard({ enquiry }) {
 }
 
 export default function MyEnquiriesPage() {
-  const { data, isLoading, isError } = useGetMyEnquiriesQuery();
+  const { data, isLoading, isError, error } = useGetMyEnquiriesQuery();
   const enquiries = data?.data || [];
 
   return (
@@ -150,7 +151,14 @@ export default function MyEnquiriesPage() {
         {isError && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <XCircleIcon className="w-12 h-12 text-red-400 mb-3" />
-            <p className="text-gray-500">Failed to load enquiries. Please try again.</p>
+            <p className="text-gray-500 mb-2">Failed to load enquiries.</p>
+            <p className="text-xs text-gray-400 italic">Error: {error?.data?.error?.message || error?.status || 'Unknown error'}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 text-xs font-bold text-[#7C5CFF] hover:underline"
+            >
+              Reload Page
+            </button>
           </div>
         )}
 
