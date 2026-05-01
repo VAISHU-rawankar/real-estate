@@ -110,7 +110,10 @@ export default function ChatWidget() {
       
       setMessages([...newMessages, { role: 'ai', text: result.data.text }]);
     } catch (err) {
-      setMessages([...newMessages, { role: 'ai', text: 'Sorry, I encountered an error. Please try again or check your API key.' }]);
+      console.error('[ChatWidget] Error details:', err);
+      const errMsg = err?.data?.error?.message || err?.data?.message || err?.message || 'Unknown error';
+      console.error('[ChatWidget] Gemini Error:', errMsg);
+      setMessages([...newMessages, { role: 'ai', text: `Error: ${errMsg}` }]);
     }
   };
 

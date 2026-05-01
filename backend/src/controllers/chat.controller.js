@@ -8,12 +8,16 @@ const { sendError } = require('../utils/apiResponse');
 
 exports.handleChat = asyncHandler(async (req, res, next) => {
   const apiKey = process.env.GEMINI_API_KEY;
+  console.log('[CHAT DEBUG] Using API Key (masked):', apiKey ? `${apiKey.substring(0, 8)}...` : 'MISSING');
+  
   if (!apiKey) {
     return sendError(res, { status: 500, message: 'GEMINI_API_KEY is not configured', code: 'CONFIG_ERROR' });
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const { message, history, role: bodyRole } = req.body;
+  console.log('[CHAT DEBUG] Incoming Message:', message);
+  console.log('[CHAT DEBUG] Detected Role:', bodyRole);
 
   if (!message) {
     return sendError(res, { status: 400, message: 'Message is required', code: 'VALIDATION_ERROR' });
@@ -62,7 +66,7 @@ ${knowledgeBaseContext}
   ];
 
   const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash", 
+    model: "gemini-2.5-flash",
     systemInstruction: systemPrompt,
     safetySettings
   });
@@ -93,14 +97,24 @@ ${knowledgeBaseContext}
     history: chatHistory,
   });
 
-  const result = await chat.sendMessage(message);
-  const responseText = result.response.text();
+  try {
+    const result = await chat.sendMessage(message);
+    const responseText = result.response.text();
+    console.log('[CHAT DEBUG] Success response generated');
 
-  res.status(200).json({
-    success: true,
-    data: {
-      text: responseText,
-      roleDetected: role
-    }
-  });
+    res.status(200).json({
+      success: true,
+      data: {
+        text: responseText,
+        roleDetected: role
+      }
+    });
+  } catch (error) {
+    console.error('[CHAT ERROR] Gemini API Failure:', error.message);
+    return sendError(res, { 
+      status: 500, 
+      message: `AI Error: ${error.message}`, 
+      code: 'SERVER_ERROR' 
+    });
+  }
 });
