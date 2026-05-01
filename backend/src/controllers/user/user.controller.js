@@ -44,9 +44,20 @@ const removeFromShortlist = asyncHandler(async (req, res) => {
 });
 
 const getMyEnquiries = asyncHandler(async (req, res) => {
-  const enquiries = await Lead.find({ phone: req.user.phone })
+  const query = {
+    $or: [
+      { email: req.user.email },
+    ]
+  };
+
+  if (req.user.phone) {
+    query.$or.push({ phone: req.user.phone });
+  }
+
+  const enquiries = await Lead.find(query)
     .populate('property', 'title slug images location price')
     .sort({ createdAt: -1 }).lean();
+
   sendSuccess(res, { data: enquiries });
 });
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useGetPropertyBySlugQuery, useGetRelatedPropertiesQuery } from '@store/api/propertyApi';
-import { MapPinIcon, ArrowLeftIcon, PhoneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { useCreateEnquiryMutation } from '@store/api/leadApi';
+import { selectCurrentUser } from '@store/slices/authSlice';
+import { MapPinIcon, ArrowLeftIcon, PhoneIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import LoadingPage from '@components/common/LoadingPage';
 import PropertyCard from '@components/property/PropertyCard';
 
@@ -15,9 +18,38 @@ function formatPrice(price) {
 
 export default function PropertyDetailPage() {
   const { slug } = useParams();
+  const user = useSelector(selectCurrentUser);
   const { data, isLoading, error } = useGetPropertyBySlugQuery(slug);
   const { data: relatedData } = useGetRelatedPropertiesQuery(slug);
+  const [createEnquiry, { isLoading: isSubmitting }] = useCreateEnquiryMutation();
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+    message: '',
+  });
+  const [success, setSuccess] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const handleEnquiry = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    if (!form.name || !form.phone) return setFormError('Name and Phone are required.');
+
+    try {
+      await createEnquiry({
+        ...form,
+        property: data?.data?._id,
+        source: 'enquiry-form',
+      }).unwrap();
+      setSuccess(true);
+      setForm({ ...form, message: '' });
+    } catch (err) {
+      setFormError(err?.data?.error?.message || 'Failed to send enquiry. Please try again.');
+    }
+  };
 
   if (isLoading) return <LoadingPage />;
   if (error) return (
@@ -188,16 +220,59 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-4">
             <div className="bg-[#1A1A1A] text-white p-6 md:p-8 rounded-[32px] sticky top-24 shadow-xl">
               <h3 className="text-xl font-display font-semibold tracking-tight mb-6">Enquire Now</h3>
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="Your Name" />
-                <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="Phone Number" type="tel" />
-                <input className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" placeholder="Email Address" type="email" />
-                <textarea className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium resize-none h-24" placeholder="Your message..." />
-                
-                <button type="submit" className="w-full bg-[#7C5CFF] hover:bg-[#6D28D9] text-white text-xs font-bold py-3 rounded-full transition-all duration-300 shadow-md shadow-[#7C5CFF]/20 mt-2">
-                  Send Enquiry
-                </button>
-              </form>
+              
+              {success ? (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 text-center animate-fade-in">
+                  <CheckCircleIcon className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-white">Enquiry Sent!</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Our expert will contact you within 24 hours.</p>
+                  <button onClick={() => setSuccess(false)} className="mt-4 text-[10px] font-bold uppercase tracking-widest text-[#7C5CFF] hover:underline">Send another</button>
+                </div>
+              ) : (
+                <form className="space-y-4" onSubmit={handleEnquiry}>
+                  {formError && (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-2 text-red-400 text-[10px] font-bold">
+                      <XMarkIcon className="w-4 h-4" /> {formError}
+                    </div>
+                  )}
+                  <input 
+                    required
+                    className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" 
+                    placeholder="Your Name" 
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                  <input 
+                    required
+                    className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" 
+                    placeholder="Phone Number" 
+                    type="tel" 
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                  <input 
+                    className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium" 
+                    placeholder="Email Address" 
+                    type="email" 
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                  <textarea 
+                    className="w-full bg-white/10 border border-white/10 text-white rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#7C5CFF] font-medium resize-none h-24" 
+                    placeholder="Your message..." 
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  />
+                  
+                  <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full bg-[#7C5CFF] hover:bg-[#6D28D9] text-white text-xs font-bold py-3 rounded-full transition-all duration-300 shadow-md shadow-[#7C5CFF]/20 mt-2 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+                  </button>
+                </form>
+              )}
 
               {/* Chat & Call links */}
               <div className="flex gap-3 mt-6 border-t border-white/10 pt-6">
