@@ -21,8 +21,6 @@ services:
           property: connectionString
       - key: CLIENT_URL
         value: https://real-estate-alpha-gilt-24.vercel.app
-      - key: GEMINI_API_KEY
-        value: AIzaSyCQ2ThiZHK9Vjk-KX4Jgsr54G_qWlIoLOM
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
@@ -47,8 +45,6 @@ services:
           type: web
           name: realestate-backend
           property: host
-      - key: GEMINI_API_KEY
-        value: AIzaSyCQ2ThiZHK9Vjk-KX4Jgsr54G_qWlIoLOM
 
 # --- Add-ons ---
 databases:
