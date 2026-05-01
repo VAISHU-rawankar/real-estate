@@ -35,7 +35,7 @@ const ShortlistPage = lazy(() => import('@pages/user/ShortlistPage'));
 const ProfilePage = lazy(() => import('@pages/user/ProfilePage'));
 const MyEnquiriesPage = lazy(() => import('@pages/user/MyEnquiriesPage'));
 const SearchAlertsPage = lazy(() => import('@pages/user/SearchAlertsPage'));
-const ComparePage = lazy(() => import('@pages/user/ComparePage'));
+const UserComparePage = lazy(() => import('@pages/user/ComparePage'));
 const SettingsPage = lazy(() => import('@pages/user/SettingsPage'));
 
 const AdminDashboard = lazy(() => import('@pages/admin/AdminDashboard'));
@@ -93,7 +93,7 @@ const router = createBrowserRouter([
               { path: 'shortlist', element: <Suspense fallback={<SuspenseFallback />}><ShortlistPage /></Suspense> },
               { path: 'enquiries', element: <Suspense fallback={<SuspenseFallback />}><MyEnquiriesPage /></Suspense> },
               { path: 'alerts', element: <Suspense fallback={<SuspenseFallback />}><SearchAlertsPage /></Suspense> },
-              { path: 'compare', element: <Suspense fallback={<SuspenseFallback />}><ComparePage /></Suspense> },
+              { path: 'compare', element: <Suspense fallback={<SuspenseFallback />}><UserComparePage /></Suspense> },
               { path: 'profile', element: <Suspense fallback={<SuspenseFallback />}><ProfilePage /></Suspense> },
               { path: 'settings', element: <Suspense fallback={<SuspenseFallback />}><SettingsPage /></Suspense> },
             ]
