@@ -111,7 +111,18 @@ export default function ChatWidget() {
       setMessages([...newMessages, { role: 'ai', text: result.data.text }]);
     } catch (err) {
       console.error('[ChatWidget] Error details:', err);
-      const errMsg = err?.data?.error?.message || err?.data?.message || err?.message || 'Unknown error';
+      let errMsg = 'Unknown error';
+      
+      if (err?.data?.error?.message) {
+        errMsg = err.data.error.message;
+      } else if (err?.data?.message) {
+        errMsg = err.data.message;
+      } else if (err?.message) {
+        errMsg = err.message;
+      } else if (err?.status) {
+        errMsg = `Server error: ${err.status}`;
+      }
+      
       console.error('[ChatWidget] Gemini Error:', errMsg);
       setMessages([...newMessages, { role: 'ai', text: `Error: ${errMsg}` }]);
     }

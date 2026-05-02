@@ -62,7 +62,7 @@ export default function AdminAnalytics() {
 
         {/* Top Row: Conversion & Volume */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <AnalyticCard title="Lead Conversion Pipeline" icon={FunnelIcon}>
+          {/* <AnalyticCard title="Lead Conversion Pipeline" icon={FunnelIcon}>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -83,9 +83,9 @@ export default function AdminAnalytics() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </AnalyticCard>
+          </AnalyticCard> */}
 
-          <AnalyticCard title="Acquisition Channels" icon={GlobeAltIcon}>
+          {/* <AnalyticCard title="Acquisition Channels" icon={GlobeAltIcon}>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={leadAnalytics.bySource || []} layout="vertical" margin={{ left: 20 }}>
@@ -96,16 +96,16 @@ export default function AdminAnalytics() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </AnalyticCard>
+          </AnalyticCard> */}
 
           <AnalyticCard title="Listing Performance" icon={ChartBarIcon}>
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              {/* <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <span className="text-sm font-medium text-gray-500">Avg. Leads / Property</span>
                 <span className="text-lg font-bold text-[#111111]">
                   {(stats.leads?.total / (stats.properties?.total || 1)).toFixed(1)}
                 </span>
-              </div>
+              </div> */}
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <span className="text-sm font-medium text-gray-500">Active Listings</span>
                 <span className="text-lg font-bold text-emerald-600">{stats.properties?.total || 0}</span>
@@ -120,7 +120,7 @@ export default function AdminAnalytics() {
 
         {/* Bottom Row: Trends */}
         <div className="grid grid-cols-1 gap-8">
-          <AnalyticCard title="Lead Acquisition Trend" icon={ArrowTrendingUpIcon}>
+          {/* <AnalyticCard title="Lead Acquisition Trend" icon={ArrowTrendingUpIcon}>
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={leadAnalytics.dailyTrend || []} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -138,7 +138,7 @@ export default function AdminAnalytics() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </AnalyticCard>
+          </AnalyticCard> */}
         </div>
       </div>
     </>

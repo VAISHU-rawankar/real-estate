@@ -40,32 +40,34 @@ const itemAnim = {
 
 function StatCard({ item, index }) {
   return (
-    <motion.div 
-      variants={itemAnim}
-      whileHover={{ y: -5 }}
-      className="bg-white p-6 rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden group transition-all duration-300"
-    >
-      <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500">
-        <item.icon className="w-24 h-24 rotate-12" />
-      </div>
-      
-      <div className="flex items-start gap-4 relative z-10">
-        <div className={`w-14 h-14 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0 shadow-sm border border-white/20`}>
-          <item.icon className={`w-7 h-7 ${item.iconColor}`} />
+    <Link to={item.to || '#'}>
+      <motion.div 
+        variants={itemAnim}
+        whileHover={{ y: -5 }}
+        className="bg-white p-6 rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between relative overflow-hidden group transition-all duration-300 h-full"
+      >
+        <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500">
+          <item.icon className="w-24 h-24 rotate-12" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-gray-400 text-[13px] font-bold uppercase tracking-wider mb-1">{item.title}</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-display font-bold text-[#111111]">{item.value}</p>
-            {item.trend && (
-              <span className={`text-[11px] font-bold ${item.trend > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {item.trend > 0 ? '↑' : '↓'} {Math.abs(item.trend)}%
-              </span>
-            )}
+        
+        <div className="flex items-start gap-4 relative z-10">
+          <div className={`w-14 h-14 rounded-2xl ${item.iconBg} flex items-center justify-center shrink-0 shadow-sm border border-white/20`}>
+            <item.icon className={`w-7 h-7 ${item.iconColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-gray-400 text-[13px] font-bold uppercase tracking-wider mb-1">{item.title}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-display font-bold text-[#111111]">{item.value}</p>
+              {item.trend && (
+                <span className={`text-[11px] font-bold ${item.trend > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  {item.trend > 0 ? '↑' : '↓'} {Math.abs(item.trend)}%
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -98,23 +100,17 @@ export default function AdminDashboard() {
       icon: BuildingOfficeIcon, 
       iconBg: 'bg-[#FFF9F2]', 
       iconColor: 'text-[#D4A853]',
-      trend: 12
-    },
-    { 
-      title: 'Total Leads', 
-      value: leads.total || 0, 
-      icon: UsersIcon, 
-      iconBg: 'bg-[#F0EEFF]', 
-      iconColor: 'text-[#7C5CFF]',
-      trend: 8
+      trend: 12,
+      to: '/admin/properties'
     },
     { 
       title: 'Total Views', 
       value: (properties.totalViews || 0).toLocaleString(), 
-      icon: ChartBarIcon, 
+      icon: EyeIcon, 
       iconBg: 'bg-[#E6FFFA]', 
       iconColor: 'text-[#00BFA5]',
-      trend: 24
+      trend: 24,
+      to: '/admin/analytics'
     },
     { 
       title: 'Active Users', 
@@ -122,7 +118,17 @@ export default function AdminDashboard() {
       icon: UserGroupIcon, 
       iconBg: 'bg-[#FFF0F3]', 
       iconColor: 'text-[#FF4D6D]',
-      trend: -2
+      trend: -2,
+      to: '/admin'
+    },
+    { 
+      title: 'Total Analytics', 
+      value: '84%', 
+      icon: ChartBarIcon, 
+      iconBg: 'bg-[#F0EEFF]', 
+      iconColor: 'text-[#7C5CFF]',
+      trend: 15,
+      to: '/admin/analytics'
     },
   ];
 
@@ -169,7 +175,7 @@ export default function AdminDashboard() {
               </div>
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Welcome back, Admin! 👋</h1>
               <p className="text-gray-400 text-sm max-w-lg leading-relaxed font-medium">
-                Here's what's happening with your real estate portfolio today. You have {leads.byStatus?.new || 0} new leads waiting for your attention.
+                Here's what's happening with your real estate portfolio today. Explore your property statistics and performance.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -311,8 +317,8 @@ export default function AdminDashboard() {
 
         {/* Bottom Row (Three Equal Columns) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Leads Overview (Chart) */}
-          <motion.div variants={itemAnim} className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+          {/* Leads Overview (Chart) - Hidden */}
+          {/* <motion.div variants={itemAnim} className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-display font-bold text-[#111111]">Leads Trend</h2>
               <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-[11px] font-bold text-[#111111] hover:bg-gray-100 transition-colors">
@@ -348,10 +354,10 @@ export default function AdminDashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </motion.div>
+          </motion.div> */}
 
-          {/* Leads Overview (Pie) */}
-          <motion.div variants={itemAnim} className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+          {/* Leads Overview (Pie) - Hidden */}
+          {/* <motion.div variants={itemAnim} className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
             <h2 className="text-xl font-display font-bold text-[#111111] mb-8">Lead conversion</h2>
             <div className="flex flex-col items-center">
               <div className="relative w-52 h-52 mb-8">
@@ -390,7 +396,7 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Quick Actions */}
           <motion.div variants={itemAnim} className="bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
@@ -398,7 +404,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-5">
               {[
                 { label: 'Add Property', icon: BuildingOfficeIcon, color: 'text-[#D4A853]', bg: 'bg-[#FFF9F2]', to: '/admin/properties/create' },
-                { label: 'View Leads', icon: UsersIcon, color: 'text-[#7C5CFF]', bg: 'bg-[#F0EEFF]', to: '/admin/leads' },
+                // { label: 'View Leads', icon: UsersIcon, color: 'text-[#7C5CFF]', bg: 'bg-[#F0EEFF]', to: '/admin/leads' },
                 { label: 'Analytics', icon: ChartBarIcon, color: 'text-[#00BFA5]', bg: 'bg-[#E6FFFA]', to: '/admin/analytics' },
                 { label: 'Reports', icon: DocumentArrowDownIcon, color: 'text-[#FF4D6D]', bg: 'bg-[#FFF0F3]', to: '#' },
               ].map((action, idx) => (

@@ -27,23 +27,23 @@ const LANGUAGES = [
 
 const SECTIONS_BY_PAGE = {
   home: [
-    { id: 'hero', label: 'Hero Section', fields: ['title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'imageUrl', 'imagesArray'] },
-    { id: 'featured', label: 'Featured Properties Text', fields: ['title', 'subtitle', 'description'] },
-    { id: 'stats', label: 'Platform Stats', fields: ['title', 'subtitle', 'description'] },
-    { id: 'testimonials', label: 'Testimonials', fields: ['title', 'subtitle', 'testimonialsArray'] }
+    { id: 'hero', label: 'Hero Section', fields: ['title', 'subtitle', 'description', 'buttonText', 'buttonLink', 'imageUrl', 'imagesArray', 'videoUrl'] },
+    { id: 'featured', label: 'Featured Properties Text', fields: ['title', 'subtitle', 'description', 'imagesArray'] },
+    { id: 'stats', label: 'Platform Stats', fields: ['title', 'subtitle', 'description', 'imagesArray'] },
+    { id: 'testimonials', label: 'Testimonials', fields: ['title', 'subtitle', 'testimonialsArray', 'imagesArray'] }
   ],
   about: [
-    { id: 'hero', label: 'About Hero', fields: ['title', 'subtitle', 'imageUrl'] },
-    { id: 'mission', label: 'Our Mission', fields: ['title', 'description', 'imageUrl', 'imagesArray'] },
-    { id: 'features', label: 'Core Values/Features', fields: ['title', 'subtitle', 'featuresArray'] },
-    { id: 'team', label: 'Our Team', fields: ['title', 'subtitle', 'description'] }
+    { id: 'hero', label: 'About Hero', fields: ['title', 'subtitle', 'imageUrl', 'videoUrl'] },
+    { id: 'mission', label: 'Our Mission', fields: ['title', 'description', 'imageUrl', 'imagesArray', 'videoUrl'] },
+    { id: 'features', label: 'Core Values/Features', fields: ['title', 'subtitle', 'featuresArray', 'imagesArray'] },
+    { id: 'team', label: 'Our Team', fields: ['title', 'subtitle', 'description', 'imagesArray'] }
   ],
   contact: [
-    { id: 'hero', label: 'Contact Hero', fields: ['title', 'subtitle', 'description', 'imageUrl'] },
-    { id: 'info', label: 'Contact Information', fields: ['title', 'description', 'featuresArray'] }
+    { id: 'hero', label: 'Contact Hero', fields: ['title', 'subtitle', 'description', 'imageUrl', 'videoUrl'] },
+    { id: 'info', label: 'Contact Information', fields: ['title', 'description', 'featuresArray', 'imagesArray'] }
   ],
   global: [
-    { id: 'footer', label: 'Footer Settings', fields: ['title', 'description', 'imageUrl'] },
+    { id: 'footer', label: 'Footer Settings', fields: ['title', 'description', 'imageUrl', 'imagesArray'] },
     { id: 'socials', label: 'Social Media Links', fields: ['featuresArray'] }
   ]
 };
@@ -67,7 +67,7 @@ export default function AdminCms() {
 
   const { register, control, handleSubmit, reset, watch, setValue } = useForm({
     defaultValues: {
-      title: '', subtitle: '', description: '', buttonText: '', buttonLink: '', imageUrl: '',
+      title: '', subtitle: '', description: '', buttonText: '', buttonLink: '', imageUrl: '', videoUrl: '',
       features: [], testimonials: [], images: [], translations: {}
     }
   });
@@ -93,6 +93,7 @@ export default function AdminCms() {
         buttonText: sectionData.data.content.buttonText || '',
         buttonLink: sectionData.data.content.buttonLink || '',
         imageUrl: sectionData.data.content.imageUrl || '',
+        videoUrl: sectionData.data.content.videoUrl || '',
         images: sectionData.data.content.images || [],
         features: sectionData.data.content.features || [],
         testimonials: sectionData.data.content.testimonials || [],
@@ -100,7 +101,7 @@ export default function AdminCms() {
       });
     } else {
       reset({
-        title: '', subtitle: '', description: '', buttonText: '', buttonLink: '', imageUrl: '',
+        title: '', subtitle: '', description: '', buttonText: '', buttonLink: '', imageUrl: '', videoUrl: '',
         images: [], features: [], testimonials: [], translations: {}
       });
     }
@@ -143,6 +144,36 @@ export default function AdminCms() {
     } finally {
       setUploadingField(null);
       event.target.value = ''; // Reset file input
+    }
+  };
+
+  const handleVideoUpload = async (event, fieldName) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setUploadingField(fieldName);
+    const formData = new FormData();
+    formData.append('video', file);
+    formData.append('folder', `cms/${activePage}/${activeSection}/videos`);
+
+    try {
+      const response = await fetch('/api/v1/upload/video', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authStateToken}` },
+        body: formData
+      });
+      const data = await response.json();
+      if (data.success && data.data?.url) {
+        setValue(fieldName, data.data.url, { shouldDirty: true, shouldValidate: true });
+        dispatch(showToast({ type: 'success', message: 'Video uploaded successfully' }));
+      } else {
+        throw new Error(data.error?.message || 'Upload failed');
+      }
+    } catch (err) {
+      dispatch(showToast({ type: 'error', message: err.message }));
+    } finally {
+      setUploadingField(null);
+      event.target.value = '';
     }
   };
 
@@ -364,6 +395,43 @@ export default function AdminCms() {
                       {watch('imageUrl') && (
                         <div className="mt-4 rounded-xl overflow-hidden border border-gray-100 max-w-sm h-48 bg-gray-50 flex items-center justify-center relative">
                           <img src={watch('imageUrl')} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.style.display='none' }} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Video URL */}
+                  {hasField('videoUrl') && (
+                    <div className="pt-4 border-t border-gray-50">
+                      <label className="block text-sm font-bold text-[#111111] mb-2">Video URL (MP4/WebM)</label>
+                      <div className="flex gap-4 items-center">
+                        <input
+                          type="text"
+                          {...register('videoUrl')}
+                          className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#7C5CFF]/20 focus:border-[#7C5CFF] transition-all"
+                          placeholder="https://example.com/video.mp4"
+                        />
+                        <div className="relative">
+                          <input 
+                            type="file" 
+                            accept="video/*" 
+                            onChange={(e) => handleVideoUpload(e, 'videoUrl')} 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            disabled={uploadingField === 'videoUrl'}
+                          />
+                          <button 
+                            type="button" 
+                            className="bg-[#111111] hover:bg-black text-white px-4 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all flex items-center gap-2"
+                            disabled={uploadingField === 'videoUrl'}
+                          >
+                            <PlusIcon className="w-5 h-5" />
+                            {uploadingField === 'videoUrl' ? 'Uploading...' : 'Upload Video'}
+                          </button>
+                        </div>
+                      </div>
+                      {watch('videoUrl') && (
+                        <div className="mt-4 rounded-xl overflow-hidden border border-gray-100 max-w-sm bg-gray-50">
+                          <video src={watch('videoUrl')} controls className="w-full h-48 object-cover" />
                         </div>
                       )}
                     </div>

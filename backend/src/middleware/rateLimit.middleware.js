@@ -40,24 +40,39 @@ function makeOptions(windowMs, max, message, prefix) {
 }
 
 /**
- * Global: 100 requests per 15 minutes per IP
+ * Global: 1000 requests per 15 minutes per IP (relaxed in development)
  */
 const globalLimiter = rateLimit({
-  ...makeOptions(15 * 60 * 1000, 100, 'Too many requests — please try again later.', 'global'),
+  ...makeOptions(
+    process.env.NODE_ENV === 'development' ? 60 * 1000 : 15 * 60 * 1000, 
+    process.env.NODE_ENV === 'development' ? 5000 : 1000, 
+    'Too many requests — please try again later.', 
+    'global'
+  ),
 });
 
 /**
- * Auth endpoints: 5 requests per minute per IP
+ * Auth endpoints: 20 requests per minute per IP (relaxed in development)
  */
 const authLimiter = rateLimit({
-  ...makeOptions(60 * 1000, 5, 'Too many auth attempts — please try again in a minute.', 'auth'),
+  ...makeOptions(
+    60 * 1000, 
+    process.env.NODE_ENV === 'development' ? 1000 : 20, 
+    'Too many auth attempts — please try again in a minute.', 
+    'auth'
+  ),
 });
 
 /**
- * OTP endpoints: 3 requests per 10 minutes per IP
+ * OTP endpoints: 10 requests per 10 minutes per IP (relaxed in development)
  */
 const otpLimiter = rateLimit({
-  ...makeOptions(10 * 60 * 1000, 3, 'Too many OTP requests — please wait 10 minutes.', 'otp'),
+  ...makeOptions(
+    process.env.NODE_ENV === 'development' ? 60 * 1000 : 10 * 60 * 1000, 
+    process.env.NODE_ENV === 'development' ? 100 : 10, 
+    'Too many OTP requests — please wait 10 minutes.', 
+    'otp'
+  ),
 });
 
 /**

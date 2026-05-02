@@ -60,14 +60,34 @@ async function uploadImage(fileBuffer, folder) {
   };
 }
 
-/**
- * Upload multiple images in parallel.
- * @param {Buffer[]} fileBuffers
- * @param {string} folder
- * @returns {Promise<Array<{url, thumbnailUrl}>>}
- */
 async function uploadImages(fileBuffers, folder) {
   return Promise.all(fileBuffers.map((buf) => uploadImage(buf, folder)));
+}
+
+/**
+ * Upload any file (video, doc, etc.) without processing.
+ * @param {Buffer} fileBuffer
+ * @param {string} originalName
+ * @param {string} mimetype
+ * @param {string} folder
+ */
+async function uploadFile(fileBuffer, originalName, mimetype, folder) {
+  const ext = originalName.split('.').pop();
+  const key = `${folder}/${uuidv4()}.${ext}`;
+
+  await s3Client.send(new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    Body: fileBuffer,
+    ContentType: mimetype,
+    CacheControl: 'public, max-age=31536000',
+  }));
+
+  return {
+    url: `${CDN}/${key}`,
+    name: originalName,
+    mimetype,
+  };
 }
 
 /**
@@ -97,4 +117,4 @@ async function generatePresignedUrl(key, expiresIn = 3600) {
   return getSignedUrl(s3Client, command, { expiresIn });
 }
 
-module.exports = { uploadImage, uploadImages, deleteImage, generatePresignedUrl };
+module.exports = { uploadImage, uploadImages, uploadFile, deleteImage, generatePresignedUrl };

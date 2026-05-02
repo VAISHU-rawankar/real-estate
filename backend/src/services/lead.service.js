@@ -178,29 +178,27 @@ async function getLeadAnalytics(dateFrom, dateTo) {
     if (dateTo) matchStage.createdAt.$lte = new Date(dateTo);
   }
 
-  const [byStatus, bySource, dailyTrend] = await Promise.all([
-    Lead.aggregate([
-      { $match: matchStage },
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]),
-    Lead.aggregate([
-      { $match: matchStage },
-      { $group: { _id: '$source', count: { $sum: 1 } } },
-    ]),
-    Lead.aggregate([
-      { $match: matchStage },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          count: { $sum: 1 },
-        },
+  const result = await Lead.aggregate([
+    { $match: matchStage },
+    {
+      $facet: {
+        byStatus: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+        bySource: [{ $group: { _id: '$source', count: { $sum: 1 } } }],
+        dailyTrend: [
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { _id: 1 } },
+          { $limit: 30 },
+        ],
       },
-      { $sort: { _id: 1 } },
-      { $limit: 30 },
-    ]),
+    },
   ]);
 
-  return { byStatus, bySource, dailyTrend };
+  return result[0] || { byStatus: [], bySource: [], dailyTrend: [] };
 }
 
 module.exports = {

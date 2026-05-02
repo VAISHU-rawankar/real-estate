@@ -66,9 +66,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(loggerMiddleware);
 }
 
-// ─── Global Rate Limiting ─────────────────────────────────────────────────────
-app.use(globalLimiter);
-
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -79,6 +76,9 @@ app.get('/health', (req, res) => {
     uptime: Math.floor(process.uptime()),
   });
 });
+
+// ─── Global Rate Limiting ─────────────────────────────────────────────────────
+app.use(globalLimiter);
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/v1', router);

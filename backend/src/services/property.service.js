@@ -323,37 +323,48 @@ async function toggleFeatured(propertyId) {
  * @returns {Promise<Object>}
  */
 async function getDashboardStats() {
-  const [statusCounts, featuredCount, allProperties, recentProperties, typeCounts, viewStats] = await Promise.all([
+  const [statsAgg, featuredCount, recentProperties] = await Promise.all([
     Property.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
+      {
+        $facet: {
+          statusCounts: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+          typeCounts: [{ $group: { _id: '$propertyType', count: { $sum: 1 } } }],
+          viewStats: [{ $group: { _id: null, totalViews: { $sum: '$viewCount' } } }],
+          mediaStats: [
+            {
+              $group: {
+                _id: null,
+                totalImages: { $sum: { $size: { $ifNull: ['$images', []] } } },
+                totalFloorPlans: { $sum: { $size: { $ifNull: ['$floorPlanImages', []] } } }
+              }
+            }
+          ]
+        }
+      }
     ]),
     Property.countDocuments({ isFeatured: true }),
-    Property.find().select('images floorPlanImages').lean(),
-    Property.find().sort({ createdAt: -1 }).limit(5).select('title slug price location bhkConfig images status propertyType viewCount').lean(),
-    Property.aggregate([
-      { $group: { _id: '$propertyType', count: { $sum: 1 } } },
-    ]),
-    Property.aggregate([
-      { $group: { _id: null, totalViews: { $sum: '$viewCount' } } },
-    ]),
+    Property.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('title slug price location bhkConfig images status propertyType viewCount')
+      .lean()
   ]);
 
-  const stats = statusCounts.reduce((acc, item) => {
+  const facet = statsAgg[0] || {};
+  
+  const stats = (facet.statusCounts || []).reduce((acc, item) => {
     acc[item._id] = item.count;
     return acc;
   }, {});
 
-  const typeMap = typeCounts.reduce((acc, item) => {
+  const typeMap = (facet.typeCounts || []).reduce((acc, item) => {
     acc[item._id] = item.count;
     return acc;
   }, {});
 
-  let totalImages = 0;
-  allProperties.forEach((p) => {
-    if (p.images) totalImages += p.images.length;
-    if (p.floorPlanImages) totalImages += p.floorPlanImages.length;
-  });
-  const mediaStorageUsed = Math.max(0.01, (totalImages * 350 * 1024) / (1024 * 1024 * 1024));
+  const mStats = facet.mediaStats?.[0] || { totalImages: 0, totalFloorPlans: 0 };
+  const totalMedia = mStats.totalImages + mStats.totalFloorPlans;
+  const mediaStorageUsed = Math.max(0.01, (totalMedia * 350 * 1024) / (1024 * 1024 * 1024));
 
   const total = Object.values(stats).reduce((a, b) => a + b, 0);
 
@@ -368,7 +379,7 @@ async function getDashboardStats() {
     mediaStorageUsed: parseFloat(mediaStorageUsed.toFixed(3)),
     recent: recentProperties,
     byType: typeMap,
-    totalViews: (viewStats && viewStats.length > 0) ? viewStats[0].totalViews : 0,
+    totalViews: facet.viewStats?.[0]?.totalViews || 0,
   };
 }
 

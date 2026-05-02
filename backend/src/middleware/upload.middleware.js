@@ -2,10 +2,17 @@
 
 const multer = require('multer');
 const path = require('path');
-const { ALLOWED_MIME_TYPES, MAX_IMAGE_SIZE_MB, MAX_IMAGES_PER_PROPERTY } = require('../utils/constants');
+const { 
+  ALLOWED_MIME_TYPES, 
+  MAX_IMAGE_SIZE_MB, 
+  MAX_IMAGES_PER_PROPERTY,
+  ALLOWED_VIDEO_MIME_TYPES,
+  MAX_VIDEO_SIZE_MB
+} = require('../utils/constants');
 const { sendError } = require('../utils/apiResponse');
 
 const MAX_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024;
 
 // ─── Memory storage (files processed by Sharp before S3 upload) ───────────────
 const storage = multer.memoryStorage();
@@ -19,6 +26,23 @@ function fileFilter(req, file, cb) {
   } else {
     cb(
       Object.assign(new Error(`Invalid file type: ${file.mimetype}. Allowed: JPEG, PNG, WebP`), {
+        code: 'INVALID_FILE_TYPE',
+        statusCode: 400,
+      }),
+      false
+    );
+  }
+}
+
+/**
+ * Video file filter
+ */
+function videoFilter(req, file, cb) {
+  if (ALLOWED_VIDEO_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      Object.assign(new Error(`Invalid video type: ${file.mimetype}. Allowed: MP4, WebM, QuickTime`), {
         code: 'INVALID_FILE_TYPE',
         statusCode: 400,
       }),
@@ -46,6 +70,15 @@ const uploadMultiple = multer({
 }).array('images', MAX_IMAGES_PER_PROPERTY);
 
 /**
+ * Single video upload middleware.
+ */
+const uploadVideo = multer({
+  storage,
+  fileFilter: videoFilter,
+  limits: { fileSize: MAX_VIDEO_SIZE_BYTES, files: 1 },
+}).single('video');
+
+/**
  * Wrap multer middleware to convert errors to our standard API error format.
  */
 function wrapMulter(multerMiddleware) {
@@ -71,4 +104,5 @@ function wrapMulter(multerMiddleware) {
 module.exports = {
   uploadSingle: wrapMulter(uploadSingle),
   uploadMultiple: wrapMulter(uploadMultiple),
+  uploadVideo: wrapMulter(uploadVideo),
 };

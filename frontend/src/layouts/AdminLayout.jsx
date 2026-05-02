@@ -13,7 +13,7 @@ import ToastContainer from '@components/common/ToastContainer';
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: HomeIcon, exact: true },
   { label: 'Properties', href: '/admin/properties', icon: BuildingOfficeIcon },
-  { label: 'Leads', href: '/admin/leads', icon: UsersIcon },
+// { label: 'Leads', href: '/admin/leads', icon: UsersIcon },
   { label: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
   { label: 'CMS', href: '/admin/cms', icon: DocumentTextIcon },
 ];

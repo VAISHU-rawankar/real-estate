@@ -51,13 +51,16 @@ const OTP_EXPIRY_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 3;
 const OTP_BLOCK_MINUTES = 15;
 
-// ─── Image ───────────────────────────────────────────────────────────────────
+// ─── Image & Media ────────────────────────────────────────────────────────────
 const MAX_IMAGE_SIZE_MB = 10;
 const MAX_IMAGES_PER_PROPERTY = 30;
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const IMAGE_MAX_WIDTH = 1200;
 const THUMBNAIL_WIDTH = 400;
 const IMAGE_QUALITY = 80;
+
+const MAX_VIDEO_SIZE_MB = 100;
+const ALLOWED_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/mpeg'];
 
 // ─── Cache TTL (seconds) ──────────────────────────────────────────────────────
 const CACHE_TTL = {
@@ -94,6 +97,8 @@ module.exports = {
   MAX_IMAGE_SIZE_MB,
   MAX_IMAGES_PER_PROPERTY,
   ALLOWED_MIME_TYPES,
+  MAX_VIDEO_SIZE_MB,
+  ALLOWED_VIDEO_MIME_TYPES,
   IMAGE_MAX_WIDTH,
   THUMBNAIL_WIDTH,
   IMAGE_QUALITY,
