@@ -13,7 +13,7 @@ import ToastContainer from '@components/common/ToastContainer';
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: HomeIcon, exact: true },
   { label: 'Properties', href: '/admin/properties', icon: BuildingOfficeIcon },
-// { label: 'Leads', href: '/admin/leads', icon: UsersIcon },
+  { label: 'Enquiries', href: '/admin/leads', icon: UsersIcon },
   { label: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
   { label: 'CMS', href: '/admin/cms', icon: DocumentTextIcon },
 ];
@@ -110,7 +110,7 @@ export default function AdminLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 lg:ml-[260px]">
         {/* Top Header */}
-        <header className="h-[80px] md:h-[100px] flex items-center justify-between px-4 md:px-10 bg-transparent shrink-0 relative">
+        <header className="h-[80px] md:h-[100px] flex items-center justify-between px-4 md:px-6 bg-transparent shrink-0 relative">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-[#111111] p-2 -ml-2">
             <Bars3Icon className="w-6 h-6" />
           </button>
@@ -134,7 +134,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-10 pb-10 overflow-auto">
+        <main className="flex-1 px-4 md:px-6 pb-10 overflow-auto">
           <Outlet />
         </main>
       </div>

@@ -162,6 +162,27 @@ const reorderImages = asyncHandler(async (req, res) => {
   sendSuccess(res, { data: property.images, message: 'Images reordered' });
 });
 
+/**
+ * POST /api/v1/admin/properties/:id/video
+ */
+const uploadPropertyVideo = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return sendError(res, { status: 400, message: 'No video file uploaded', code: 'NO_FILE' });
+  }
+
+  const folder = `property-videos/${req.params.id}`;
+  const result = await s3Service.uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype, folder);
+
+  const property = await Property.findByIdAndUpdate(
+    req.params.id,
+    { videoUrl: result.url },
+    { new: true }
+  );
+
+  if (!property) return sendError(res, { status: 404, message: 'Property not found', code: 'NOT_FOUND' });
+  sendSuccess(res, { data: { url: result.url }, message: 'Video uploaded successfully' });
+});
+
 module.exports = {
   getAdminProperties,
   createProperty,
@@ -173,4 +194,5 @@ module.exports = {
   uploadPropertyImages,
   deletePropertyImage,
   reorderImages,
+  uploadPropertyVideo,
 };

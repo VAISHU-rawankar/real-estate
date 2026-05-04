@@ -1,256 +1,253 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
   HeartIcon, 
-  ClipboardDocumentListIcon, 
-  BellIcon,
-  ChevronRightIcon,
+  HomeIcon, 
+  BellIcon, 
+  ChatBubbleBottomCenterTextIcon,
+  ArrowUpRightIcon,
   MapPinIcon,
+  StarIcon,
+  ChevronRightIcon,
   ChevronLeftIcon,
-  EllipsisVerticalIcon,
-  PencilSquareIcon,
   SpeakerWaveIcon
 } from '@heroicons/react/24/outline';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '@store/slices/authSlice';
-import { useGetShortlistQuery, useGetMyEnquiriesQuery, useGetAlertsQuery } from '@store/api/userApi';
-
-const RECENTLY_VIEWED = [
-  { id: 1, title: 'Luxury 3BHK Apartment', location: 'Koramangala, Bengaluru', price: '₹1.25 Cr', type: 'FOR SALE', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400', beds: 3, baths: 3, sqft: 1800 },
-  { id: 2, title: 'Modern Villa with Pool', location: 'Whitefield, Bengaluru', price: '₹45,000 /mo', type: 'FOR RENT', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=400', beds: 4, baths: 4, sqft: 3200 },
-  { id: 3, title: 'Premium 2BHK Apartment', location: 'HSR Layout, Bengaluru', price: '₹3.40 Cr', type: 'FOR SALE', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=400', beds: 2, baths: 2, sqft: 1200 },
-  { id: 4, title: 'Urban Studio Flat', location: 'Electronic City, Bengaluru', price: '₹32,000 /mo', type: 'FOR RENT', image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=400', beds: 1, baths: 1, sqft: 650 },
-];
+import PropertyCard from '@components/property/PropertyCard';
+import { 
+  useGetShortlistQuery, 
+  useGetMyEnquiriesQuery, 
+  useGetAlertsQuery 
+} from '../../store/api/userApi';
+import { 
+  useGetPropertiesQuery, 
+  useGetFeaturedPropertiesQuery 
+} from '../../store/api/propertyApi';
 
 export default function DashboardPage() {
   const user = useSelector(selectCurrentUser) || { name: 'User' };
   
-  // Real Data Queries
-  const { data: shortlistData, isLoading: loadingShortlist } = useGetShortlistQuery();
-  const { data: enquiriesData, isLoading: loadingEnquiries } = useGetMyEnquiriesQuery();
-  const { data: alertsData, isLoading: loadingAlerts } = useGetAlertsQuery();
+  // User Data
+  const { data: shortlistRaw } = useGetShortlistQuery();
+  const { data: enquiriesRaw } = useGetMyEnquiriesQuery();
+  const { data: alertsRaw } = useGetAlertsQuery();
 
-  const shortlistCount = shortlistData?.data?.length || 0;
-  const enquiries = enquiriesData?.data || [];
-  const alerts = alertsData?.data || [];
+  // Property Data (Real Database)
+  const { data: featuredRaw, isLoading: loadingFeatured } = useGetFeaturedPropertiesQuery(4);
+  const { data: propertiesRaw, isLoading: loadingProperties } = useGetPropertiesQuery({ limit: 4 });
+
+  const shortlist = shortlistRaw?.data || [];
+  const enquiries = enquiriesRaw?.data || [];
+  const alerts = alertsRaw?.data || [];
+  
+  const featuredProperties = featuredRaw?.data || [];
+  const recentProperties = propertiesRaw?.data?.properties || propertiesRaw?.data || [];
 
   const STATS = [
-    { id: 1, label: 'Saved Properties', value: shortlistCount, icon: HeartIcon, color: 'text-rose-500', bg: 'bg-rose-50', path: '/dashboard/shortlist' },
-    { id: 2, label: 'My Enquiries', value: enquiries.length, icon: ClipboardDocumentListIcon, color: 'text-blue-500', bg: 'bg-blue-50', path: '/dashboard/enquiries' },
-    { id: 3, label: 'Active Alerts', value: alerts.length, icon: BellIcon, color: 'text-[#7C5CFF]', bg: 'bg-[#7C5CFF]/10', path: '/dashboard/alerts' },
+    { 
+      id: 1, 
+      label: 'Saved Properties', 
+      value: shortlist.length, 
+      icon: HeartIcon, 
+      color: 'text-rose-500', 
+      bg: 'bg-rose-50',
+      path: '/dashboard/shortlist'
+    },
+    { 
+      id: 2, 
+      label: 'My Enquiries', 
+      value: enquiries.length, 
+      icon: ChatBubbleBottomCenterTextIcon, 
+      color: 'text-violet-500', 
+      bg: 'bg-violet-50',
+      path: '/dashboard/enquiries'
+    },
+    { 
+      id: 3, 
+      label: 'Active Alerts', 
+      value: alerts.length, 
+      icon: BellIcon, 
+      color: 'text-amber-500', 
+      bg: 'bg-amber-50',
+      path: '/dashboard/alerts'
+    },
   ];
 
-  return (
-    <>
-      <Helmet><title>Dashboard — RealEstate</title></Helmet>
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
 
-      <div className="flex flex-col lg:flex-row gap-10">
-        {/* Left Column: Main Dashboard */}
-        <div className="flex-1 space-y-12">
+  const itemAnim = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-10"
+    >
+      {/* ─── Top Section: Stats & Side Panels ─────────────────────────── */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        <div className="xl:col-span-8 space-y-8 min-w-0">
           {/* Main Header */}
-          <div>
-            <motion.h1 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-3xl font-display font-bold text-[#111111] mb-2"
-            >
-              Welcome back, {user.name.split(' ')[0]}! 👋
-            </motion.h1>
-            <p className="text-gray-400 font-medium">Find your next perfect home faster</p>
-          </div>
+          <motion.div variants={itemAnim}>
+            <h1 className="text-2xl md:text-3xl font-display font-semibold text-[#111111] mb-2 tracking-tight">
+              Hello, {user.name.split(' ')[0]}! 👋
+            </h1>
+            <p className="text-gray-400 font-medium text-sm opacity-80">Your personalized property insights and updates.</p>
+          </motion.div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {STATS.map((stat, idx) => (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {STATS.map((stat) => (
               <motion.div 
                 key={stat.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-white p-6 rounded-[24px] shadow-sm hover:shadow-xl transition-all group relative overflow-hidden"
+                variants={itemAnim}
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 rounded-[28px] border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group overflow-hidden relative"
               >
+                <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#7C5CFF]/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center shadow-sm`}>
                     <stat.icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <Link to={stat.path} className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">View all</Link>
+                  <Link to={stat.path} className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#7C5CFF] hover:text-white transition-all">
+                    <ArrowUpRightIcon className="w-4 h-4" />
+                  </Link>
                 </div>
-                <p className="text-3xl font-display font-bold text-[#111111] mb-1">
-                  {loadingShortlist || loadingEnquiries || loadingAlerts ? '...' : stat.value}
+                <p className="text-2xl font-display font-semibold text-[#111111] mb-1 tracking-tight">
+                  {stat.value}
                 </p>
-                <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
+                <p className="text-gray-400 text-[9px] font-semibold uppercase tracking-[0.2em]">{stat.label}</p>
               </motion.div>
             ))}
           </div>
-
-          {/* Recently Viewed (Still mock, but UI preserved) */}
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Recently Viewed</h2>
-              <div className="flex items-center gap-3">
-                <button className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest mr-4">View All</button>
-                <div className="flex gap-2">
-                  <button className="p-2 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 transition-all">
-                    <ChevronLeftIcon className="w-4 h-4 text-gray-500" />
-                  </button>
-                  <button className="p-2 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 transition-all">
-                    <ChevronRightIcon className="w-4 h-4 text-gray-500" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-              {RECENTLY_VIEWED.map((property) => (
-                <div key={property.id} className="min-w-[300px] bg-white rounded-[24px] p-4 shadow-sm hover:shadow-xl transition-all cursor-pointer group">
-                  <div className="relative aspect-[4/3] rounded-[20px] overflow-hidden mb-4">
-                    <img src={property.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
-                    <div className="absolute top-3 left-3 bg-[#7C5CFF] text-white text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest">
-                      {property.type}
-                    </div>
-                    <button className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-[#7C5CFF] transition-all">
-                      <HeartIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-lg font-bold text-[#111111]">{property.price}</p>
-                    <p className="text-sm font-medium text-gray-400 flex items-center gap-1">
-                      <MapPinIcon className="w-3.5 h-3.5" /> {property.location}
-                    </p>
-                    <div className="flex gap-3 pt-3 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-                      <span>{property.beds} BHK</span>
-                      <span>•</span>
-                      <span>{property.sqft} sqft</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggested For You */}
-          <div className="space-y-8">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Suggested For You</h2>
-              <button className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {RECENTLY_VIEWED.slice(0, 4).map((property) => (
-                <div key={`sug-${property.id}`} className="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl transition-all group flex h-48">
-                  <div className="w-48 h-full overflow-hidden">
-                    <img src={property.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="" />
-                  </div>
-                  <div className="flex-1 p-6 flex flex-col justify-between">
-                    <div>
-                      <span className="text-[#7C5CFF] text-[10px] font-bold uppercase tracking-widest mb-1 block">{property.type}</span>
-                      <h3 className="text-lg font-bold text-[#111111] mb-1 leading-tight">{property.title}</h3>
-                      <p className="text-sm text-gray-400 font-medium truncate max-w-[200px]">{property.location}</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <p className="text-xl font-display font-bold text-[#111111]">{property.price}</p>
-                      <button className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-[#7C5CFF] hover:text-white transition-all">
-                        <HeartIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* Right Column: Side Panels */}
-        <div className="w-full lg:w-[400px] space-y-10">
-          {/* My Enquiries Panel */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Recent Enquiries</h2>
-              <Link to="/dashboard/enquiries" className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</Link>
-            </div>
-
-            <div className="space-y-6 mb-8">
-              {enquiries.slice(0, 3).map((enq) => (
-                <Link to={`/properties/${enq.property?.slug}`} key={enq._id} className="flex gap-4 group cursor-pointer">
-                  <img src={enq.property?.images?.[0]?.url || 'https://via.placeholder.com/100'} className="w-16 h-16 rounded-2xl object-cover shadow-sm" alt="" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="text-[14px] font-bold text-[#111111] truncate">{enq.property?.title}</h3>
-                      <span className={`bg-[#7C5CFF] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest`}>{enq.status}</span>
-                    </div>
-                    <p className="text-[11px] text-gray-400 font-medium truncate mb-1">{enq.property?.location?.city}</p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Enquired on {new Date(enq.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </Link>
-              ))}
-              {enquiries.length === 0 && (
-                <p className="text-sm text-gray-400 py-4 text-center">No recent enquiries</p>
-              )}
-            </div>
-
-            <Link to="/dashboard/enquiries" className="block w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest text-center hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
-              Go to My Enquiries
-            </Link>
-          </div>
-
-          {/* Active Alerts Panel */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-xl font-display font-bold text-[#111111] uppercase tracking-tight">Active Alerts</h2>
-              <Link to="/dashboard/alerts" className="text-[#7C5CFF] text-[12px] font-bold uppercase tracking-widest">View All</Link>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              {alerts.slice(0, 2).map((alert) => (
-                <div key={alert._id} className="p-5 border border-gray-50 rounded-2xl hover:bg-gray-50 transition-all group">
-                  <div className="flex justify-between items-start mb-3">
+        {/* Side Panel: Active Alerts & Quick Actions */}
+        <div className="xl:col-span-4">
+          <motion.div variants={itemAnim} className="bg-[#111111] rounded-[40px] p-6 text-white relative overflow-hidden shadow-2xl flex flex-col justify-between group h-full">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#7C5CFF]/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-display font-semibold tracking-tight text-white">Active Alerts</h2>
+                <span className="px-2.5 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg text-[9px] font-semibold uppercase tracking-[0.15em] text-white/90">{alerts.length} New</span>
+              </div>
+              <div className="space-y-4">
+                {alerts.slice(0, 2).map((alert) => (
+                  <div key={alert._id} className="p-4 bg-white/5 border border-white/5 rounded-[20px] hover:bg-white/10 transition-all cursor-pointer group/item">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">🏠</div>
+                      <div className="w-10 h-10 bg-[#7C5CFF] rounded-xl flex items-center justify-center text-lg shadow-lg">🔔</div>
                       <div>
-                        <h4 className="text-[13px] font-bold text-[#111111]">{alert.name}</h4>
-                        <p className="text-[11px] text-gray-500 font-medium">{alert.filters?.city} • {alert.filters?.propertyType}</p>
+                        <h4 className="text-[13px] font-semibold font-display tracking-tight text-white">{alert.name}</h4>
+                        <p className="text-[10px] text-gray-400 font-medium opacity-70 truncate max-w-[140px]">{alert.filters?.city || 'All Cities'}</p>
                       </div>
                     </div>
                   </div>
-                  <p className="text-[11px] font-bold text-[#7C5CFF] uppercase tracking-widest">Created {new Date(alert.createdAt).toLocaleDateString()}</p>
-                </div>
-              ))}
-              {alerts.length === 0 && (
-                <p className="text-sm text-gray-400 py-4 text-center">No active alerts</p>
-              )}
+                ))}
+                {alerts.length === 0 && (
+                  <div className="text-center py-6 opacity-40">
+                    <BellIcon className="w-8 h-8 mx-auto mb-2 text-gray-500" />
+                    <p className="text-[9px] font-semibold uppercase tracking-widest">No active alerts</p>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <Link to="/dashboard/alerts" className="block w-full border border-[#7C5CFF] text-[#7C5CFF] font-bold py-4 rounded-2xl text-[12px] uppercase tracking-widest text-center hover:bg-[#7C5CFF] hover:text-white transition-all active:scale-95">
+            <Link to="/dashboard/alerts" className="mt-6 block w-full bg-[#7C5CFF] text-white font-semibold py-3.5 rounded-[18px] text-[11px] uppercase tracking-[0.2em] text-center hover:bg-white hover:text-[#111111] transition-all relative z-10 active:scale-95 shadow-lg shadow-[#7C5CFF]/10">
               Manage Alerts
             </Link>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Bottom Alert Banner */}
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mt-12 bg-[#7C5CFF]/5 border border-[#7C5CFF]/10 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden"
-      >
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="w-14 h-14 bg-[#7C5CFF] rounded-2xl flex items-center justify-center shadow-lg shadow-[#7C5CFF]/30">
-            <SpeakerWaveIcon className="w-7 h-7 text-white" />
+      {/* ─── My Shortlist (Dynamic Section) ─────────────────────────── */}
+      {shortlist.length > 0 && (
+        <motion.div variants={itemAnim} className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-display font-semibold text-[#111111] tracking-tight">My Shortlist</h2>
+              <p className="text-gray-400 text-[11px] font-medium mt-1 opacity-70">Premium properties you've bookmarked</p>
+            </div>
+            <Link to="/dashboard/shortlist" className="text-[#7C5CFF] text-[10px] font-semibold uppercase tracking-[0.15em] hover:translate-x-1 transition-transform flex items-center gap-2">
+              View All <ArrowUpRightIcon className="w-3.5 h-3.5" />
+            </Link>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {shortlist.slice(0, 4).map((item, index) => item.property && (
+              <PropertyCard key={`shortlist-${item.property._id}`} property={item.property} index={index} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ─── Featured Properties ──────────────────── */}
+      <motion.div variants={itemAnim} className="space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-bold text-[#111111] mb-1">Stay Updated!</h3>
-            <p className="text-gray-500 font-medium text-sm">Turn on notifications to get instant alerts on new properties that match your preferences.</p>
+            <h2 className="text-xl font-display font-semibold text-[#111111] tracking-tight">Featured Properties</h2>
+            <p className="text-gray-400 text-[11px] font-medium mt-1 opacity-70">Handpicked premium listings for you</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="p-2.5 rounded-xl bg-white border border-gray-100 hover:bg-[#7C5CFF] hover:text-white transition-all shadow-sm">
+              <ChevronLeftIcon className="w-4 h-4" />
+            </button>
+            <button className="p-2.5 rounded-xl bg-white border border-gray-100 hover:bg-[#7C5CFF] hover:text-white transition-all shadow-sm">
+              <ChevronRightIcon className="w-4 h-4" />
+            </button>
           </div>
         </div>
-        <button className="bg-[#7C5CFF] hover:bg-[#6D4EE0] text-white px-10 py-4 rounded-2xl font-bold text-[12px] uppercase tracking-widest transition-all shadow-xl active:scale-95 relative z-10 whitespace-nowrap">
-          Enable Notifications
-        </button>
-        {/* Background glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#7C5CFF]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {loadingFeatured ? (
+            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/3] bg-gray-100 animate-pulse rounded-[28px]" />)
+          ) : featuredProperties.length > 0 ? (
+            featuredProperties.map((property, index) => (
+              <PropertyCard key={`featured-${property._id}`} property={property} index={index} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center bg-gray-50 rounded-[28px] border border-dashed border-gray-200">
+               <p className="text-gray-400 text-sm font-medium">No featured properties available yet.</p>
+            </div>
+          )}
+        </div>
       </motion.div>
-    </>
+
+      {/* ─── Suggested For You ─────────────────── */}
+      <motion.div variants={itemAnim} className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-display font-semibold text-[#111111] tracking-tight">Suggested For You</h2>
+            <p className="text-gray-400 text-[11px] font-medium mt-1 opacity-70">Based on the latest marketplace activity</p>
+          </div>
+          <Link to="/properties" className="text-[#7C5CFF] text-[10px] font-semibold uppercase tracking-[0.15em] hover:translate-x-1 transition-transform flex items-center gap-2">
+            View All <ArrowUpRightIcon className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {loadingProperties ? (
+            [1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/3] bg-gray-100 animate-pulse rounded-[28px]" />)
+          ) : recentProperties.length > 0 ? (
+            recentProperties.map((property, index) => (
+              <PropertyCard key={`suggested-${property._id}`} property={property} index={index} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center bg-gray-50 rounded-[28px] border border-dashed border-gray-200">
+               <p className="text-gray-400 text-sm font-medium">Explore properties to get personalized suggestions.</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

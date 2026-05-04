@@ -61,7 +61,7 @@ function EnquiryCard({ enquiry }) {
               {property?.location?.city && (
                 <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
                   <MapPinIcon className="w-3.5 h-3.5" />
-                  {property.location.city}, {property.location.state}
+                  {property?.location?.city}, {property?.location?.state}
                 </p>
               )}
             </div>
@@ -117,15 +117,17 @@ export default function MyEnquiriesPage() {
     <>
       <Helmet><title>My Enquiries — RealEstate</title></Helmet>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-0 px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-[#7C5CFF]/10 rounded-xl flex items-center justify-center">
-            <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#7C5CFF]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#111111]">My Enquiries</h1>
-            <p className="text-sm text-gray-400">{enquiries.length} enquiries submitted</p>
+        <div className="mb-10">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-2xl flex items-center justify-center shadow-sm">
+              <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#7C5CFF]" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-semibold text-[#111111] tracking-tight">My Enquiries</h1>
+              <p className="text-[13px] text-gray-400 font-medium opacity-80 mt-1">{enquiries.length} property enquiries submitted</p>
+            </div>
           </div>
         </div>
 

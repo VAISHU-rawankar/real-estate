@@ -54,6 +54,10 @@ export const propertyApi = baseApi.injectEndpoints({
       query: ({ id, formData }) => ({ url: `/admin/properties/${id}/images`, method: 'POST', body: formData }),
       invalidatesTags: ['Property'],
     }),
+    uploadPropertyVideo: builder.mutation({
+      query: ({ id, formData }) => ({ url: `/admin/properties/${id}/video`, method: 'POST', body: formData }),
+      invalidatesTags: ['Property'],
+    }),
     deletePropertyImage: builder.mutation({
       query: ({ propertyId, imageId }) => ({ url: `/admin/properties/${propertyId}/images/${imageId}`, method: 'DELETE' }),
       invalidatesTags: ['Property'],
@@ -79,6 +83,7 @@ export const {
   useUpdatePropertyStatusMutation,
   useToggleFeaturedMutation,
   useUploadPropertyImagesMutation,
+  useUploadPropertyVideoMutation,
   useDeletePropertyImageMutation,
   useReorderImagesMutation,
 } = propertyApi;

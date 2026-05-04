@@ -106,15 +106,17 @@ export default function SettingsPage() {
     <>
       <Helmet><title>Settings — RealEstate</title></Helmet>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-4xl mx-0 px-4 py-8 space-y-10">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#7C5CFF]/10 rounded-xl flex items-center justify-center">
-            <Cog6ToothIcon className="w-5 h-5 text-[#7C5CFF]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#111111]">Settings</h1>
-            <p className="text-sm text-gray-400">Manage your account preferences</p>
+        <div className="mb-10">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-2xl flex items-center justify-center shadow-sm">
+              <Cog6ToothIcon className="w-6 h-6 text-[#7C5CFF]" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-semibold text-[#111111] tracking-tight">Settings</h1>
+              <p className="text-[13px] text-gray-400 font-medium opacity-80 mt-1">Manage your account security and preferences</p>
+            </div>
           </div>
         </div>
 
@@ -135,45 +137,45 @@ export default function SettingsPage() {
         )}
 
         {/* ─── Change Password ──────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
+        <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-8 py-6 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
             <LockClosedIcon className="w-5 h-5 text-[#7C5CFF]" />
-            <h2 className="font-bold text-[#111111]">Change Password</h2>
+            <h2 className="font-semibold text-[#111111] tracking-tight">Change Password</h2>
           </div>
-          <form onSubmit={handlePasswordChange} className="p-6 space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Current Password</label>
+          <form onSubmit={handlePasswordChange} className="p-8 space-y-6">
+            <div className="max-w-md">
+              <label className="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-widest">Current Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwords.current}
                   onChange={e => setPasswords(p => ({ ...p, current: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#7C5CFF] transition-all pr-10"
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-200 text-sm font-semibold outline-none focus:border-[#7C5CFF] focus:ring-4 focus:ring-[#7C5CFF]/5 transition-all pr-12"
                   placeholder="Enter current password"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7C5CFF] transition-colors">
                   {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">New Password</label>
+                <label className="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-widest">New Password</label>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwords.new}
                   onChange={e => setPasswords(p => ({ ...p, new: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#7C5CFF] transition-all"
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-200 text-sm font-semibold outline-none focus:border-[#7C5CFF] focus:ring-4 focus:ring-[#7C5CFF]/5 transition-all"
                   placeholder="Min 8 characters"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Confirm New Password</label>
+                <label className="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-widest">Confirm New Password</label>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwords.confirm}
                   onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#7C5CFF] transition-all"
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-200 text-sm font-semibold outline-none focus:border-[#7C5CFF] focus:ring-4 focus:ring-[#7C5CFF]/5 transition-all"
                   placeholder="Re-enter new password"
                 />
               </div>
@@ -181,7 +183,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-6 py-3 bg-[#111111] hover:bg-[#7C5CFF] text-white font-bold rounded-xl transition-colors text-sm disabled:opacity-50"
+              className="px-10 py-4 bg-[#111111] hover:bg-[#7C5CFF] text-white font-semibold rounded-2xl transition-all shadow-xl shadow-black/10 uppercase text-[11px] tracking-widest disabled:opacity-50 active:scale-95"
             >
               {isSaving ? 'Updating...' : 'Update Password'}
             </button>
@@ -189,12 +191,12 @@ export default function SettingsPage() {
         </div>
 
         {/* ─── Notification Preferences ────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
+        <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-8 py-6 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
             <BellIcon className="w-5 h-5 text-[#7C5CFF]" />
-            <h2 className="font-bold text-[#111111]">Notifications</h2>
+            <h2 className="font-semibold text-[#111111] tracking-tight">Notifications</h2>
           </div>
-          <div className="px-6 py-2">
+          <div className="px-8 py-4 divide-y divide-gray-50">
             <ToggleSwitch
               label="Email Alerts"
               description="Get notified via email for property matches"
@@ -219,22 +221,16 @@ export default function SettingsPage() {
               enabled={notifs.priceDrops}
               onChange={v => setNotifs(n => ({ ...n, priceDrops: v }))}
             />
-            <ToggleSwitch
-              label="Newsletter"
-              description="Weekly digest of market trends and featured properties"
-              enabled={notifs.newsletter}
-              onChange={v => setNotifs(n => ({ ...n, newsletter: v }))}
-            />
           </div>
         </div>
 
         {/* ─── Privacy ─────────────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
+        <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-8 py-6 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
             <ShieldCheckIcon className="w-5 h-5 text-[#7C5CFF]" />
-            <h2 className="font-bold text-[#111111]">Privacy</h2>
+            <h2 className="font-semibold text-[#111111] tracking-tight">Privacy</h2>
           </div>
-          <div className="px-6 py-2">
+          <div className="px-8 py-4 divide-y divide-gray-50">
             <ToggleSwitch
               label="Public Profile"
               description="Allow agents to see your profile information"
@@ -251,21 +247,21 @@ export default function SettingsPage() {
         </div>
 
         {/* ─── Danger Zone ─────────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-red-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-red-50 flex items-center gap-3">
-            <TrashIcon className="w-5 h-5 text-red-500" />
-            <h2 className="font-bold text-red-500">Danger Zone</h2>
+        <div className="bg-white rounded-[32px] border border-rose-100 shadow-sm overflow-hidden">
+          <div className="px-8 py-6 border-b border-rose-50 flex items-center gap-3 bg-rose-50/30">
+            <TrashIcon className="w-5 h-5 text-rose-500" />
+            <h2 className="font-semibold text-rose-500 tracking-tight">Danger Zone</h2>
           </div>
-          <div className="p-6 flex items-center justify-between">
+          <div className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <p className="text-sm font-semibold text-[#111111]">Delete Account</p>
-              <p className="text-xs text-gray-400 mt-0.5">Permanently delete your account and all data. This cannot be undone.</p>
+              <p className="text-[13px] text-gray-400 font-medium mt-1 opacity-80">Permanently delete your account and all data. This action is irreversible.</p>
             </div>
             <button
               onClick={handleDeleteAccount}
-              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl transition-colors shrink-0"
+              className="px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white text-[11px] font-semibold rounded-2xl transition-all shadow-lg shadow-rose-500/20 uppercase tracking-widest active:scale-95"
             >
-              Delete Account
+              Delete My Account
             </button>
           </div>
         </div>

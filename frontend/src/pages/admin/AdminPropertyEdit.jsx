@@ -7,12 +7,13 @@ import { useDropzone } from 'react-dropzone';
 import { 
   BuildingOfficeIcon, MapPinIcon, DocumentTextIcon, BanknotesIcon, 
   SparklesIcon, PhotoIcon, PlusIcon, CheckIcon, ArrowLeftIcon, ArrowRightIcon,
-  TrashIcon, InformationCircleIcon
+  TrashIcon, InformationCircleIcon, VideoCameraIcon
 } from '@heroicons/react/24/outline';
 import { 
   useGetAdminPropertyByIdQuery,
   useUpdatePropertyMutation, 
   useUploadPropertyImagesMutation,
+  useUploadPropertyVideoMutation,
   useDeletePropertyImageMutation
 } from '@store/api/propertyApi';
 import { useDispatch } from 'react-redux';
@@ -40,6 +41,7 @@ export default function AdminPropertyEdit() {
   const { data: propertyData, isLoading: isLoadingProperty } = useGetAdminPropertyByIdQuery(propertyId);
   const [updateProperty, { isLoading: isUpdating }] = useUpdatePropertyMutation();
   const [uploadImages, { isLoading: isUploading }] = useUploadPropertyImagesMutation();
+  const [uploadVideo, { isLoading: isUploadingVideo }] = useUploadPropertyVideoMutation();
 
   const methods = useForm();
 
@@ -146,13 +148,12 @@ export default function AdminPropertyEdit() {
     <>
       <Helmet><title>Edit Listing — Admin</title></Helmet>
 
-      <div className="max-w-4xl mx-auto space-y-8 pb-16">
+      <div className="max-w-6xl space-y-8 pb-16">
         <div>
           <h1 className="text-2xl font-display font-bold text-navy-900">Edit Listing</h1>
           <p className="text-slate-400 text-sm mt-1">Modify your existing property listing.</p>
         </div>
 
-        {/* Progress Bar */}
         <div className="bg-white p-6 rounded-2xl shadow-card border border-slate-100">
           <div className="flex justify-between items-center relative">
             {/* Connection Line */}
@@ -170,24 +171,27 @@ export default function AdminPropertyEdit() {
               const isActive = step.id === currentStep;
               const isCompleted = step.id < currentStep;
               return (
-                <div key={step.id} className="flex flex-col items-center gap-2 relative z-10">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(step.id)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 relative group ${
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => setCurrentStep(step.id)}
+                  className="flex flex-col items-center gap-2 relative z-10 group"
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 relative ${
                       isActive 
                         ? 'bg-gold-gradient text-white shadow-gold scale-110 z-20' 
                         : isCompleted 
                           ? 'bg-emerald-500 text-white shadow-sm z-10' 
-                          : 'bg-white text-slate-400 border border-slate-200 hover:border-gold-300 hover:text-gold-500 z-10'
+                          : 'bg-white text-slate-400 border border-slate-200 group-hover:border-gold-300 group-hover:text-gold-500 z-10'
                     }`}
                   >
                     {isCompleted ? <CheckIcon className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                  </button>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-navy-900' : 'text-slate-400'}`}>
+                  </div>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-navy-900' : 'text-slate-400 group-hover:text-navy-700'}`}>
                     {step.name}
                   </span>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -210,7 +214,7 @@ export default function AdminPropertyEdit() {
                   {currentStep === 3 && <Step3Details />}
                   {currentStep === 4 && <Step4Pricing />}
                   {currentStep === 5 && <Step5Amenities />}
-                  {currentStep === 6 && <Step6Media propertyId={propertyId} setUploadedImages={setUploadedImages} uploadedImages={uploadedImages} uploadImagesMutation={uploadImages} isUploading={isUploading} />}
+                  {currentStep === 6 && <Step6Media propertyId={propertyId} setUploadedImages={setUploadedImages} uploadedImages={uploadedImages} uploadImagesMutation={uploadImages} isUploading={isUploading} uploadVideoMutation={uploadVideo} isUploadingVideo={isUploadingVideo} />}
                   {currentStep === 7 && <Step7Additional />}
                   {currentStep === 8 && <Step8Preview propertyId={propertyId} />}
                 </motion.div>
@@ -554,10 +558,11 @@ function Step5Amenities() {
   );
 }
 
-function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImagesMutation, isUploading }) {
-  const { register } = useFormContext();
+function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImagesMutation, isUploading, uploadVideoMutation, isUploadingVideo }) {
+  const { register, setValue, watch } = useFormContext();
   const dispatch = useDispatch();
   const [deleteImage] = useDeletePropertyImageMutation();
+  const videoUrl = watch('videoUrl');
 
   const onDrop = async (acceptedFiles) => {
     const formData = new FormData();
@@ -568,6 +573,22 @@ function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImage
       dispatch(showToast({ type: 'success', message: 'Images uploaded successfully!' }));
     } catch (e) {
       dispatch(showToast({ type: 'error', message: 'Upload failed. Please try again.' }));
+    }
+  };
+
+  const onVideoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('video', file);
+
+    try {
+      const response = await uploadVideoMutation({ id: propertyId, formData }).unwrap();
+      setValue('videoUrl', response.data.url, { shouldDirty: true });
+      dispatch(showToast({ type: 'success', message: 'Video uploaded successfully!' }));
+    } catch (e) {
+      dispatch(showToast({ type: 'error', message: 'Video upload failed.' }));
     }
   };
 
@@ -594,45 +615,100 @@ function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImage
         </div>
         <div>
           <h3 className="text-xl font-display font-bold text-navy-900">Media Management</h3>
-          <p className="text-slate-400 text-xs">High-quality photos significantly increase interest.</p>
+          <p className="text-slate-400 text-xs">High-quality photos and videos significantly increase interest.</p>
         </div>
       </div>
 
-      <div 
-        {...getRootProps()} 
-        className={`border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${
-          isDragActive ? 'border-gold-500 bg-gold-50' : 'border-slate-200 hover:border-gold-300 bg-slate-50/50'
-        }`}
-      >
-        <input {...getInputProps()} />
-        <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-slate-400">
-          <PhotoIcon className="w-8 h-8" />
+      {/* Image Upload Area */}
+      <div className="space-y-4">
+        <label className="label">Property Photos</label>
+        <div 
+          {...getRootProps()} 
+          className={`border-2 border-dashed rounded-3xl p-12 flex flex-col items-center justify-center transition-all cursor-pointer ${
+            isDragActive ? 'border-gold-500 bg-gold-50' : 'border-slate-200 hover:border-gold-300 bg-slate-50/50'
+          }`}
+        >
+          <input {...getInputProps()} />
+          <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-slate-400">
+            <PhotoIcon className="w-8 h-8" />
+          </div>
+          <p className="text-navy-900 font-semibold text-sm">Drag & drop files here, or click to browse</p>
+          <p className="text-slate-400 text-xs mt-1">Supports JPG, PNG, WEBP (Max 5MB each)</p>
         </div>
-        <p className="text-navy-900 font-semibold text-sm">Drag & drop files here, or click to browse</p>
-        <p className="text-slate-400 text-xs mt-1">Supports JPG, PNG, WEBP (Max 5MB each)</p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {uploadedImages.map((img) => (
+            <div key={img._id} className="relative aspect-square rounded-2xl overflow-hidden group shadow-sm border border-slate-100 bg-slate-50">
+              <img src={img.thumbnailUrl || img.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Property" />
+              <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button 
+                  type="button" 
+                  onClick={() => handleDelete(img._id)} 
+                  className="bg-white/20 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500 transition-colors"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ))}
+          {isUploading && (
+             <div className="aspect-square rounded-2xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center animate-pulse">
+               <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+               <span className="text-[10px] font-bold text-slate-400 uppercase">Uploading...</span>
+             </div>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {uploadedImages.map((img) => (
-          <div key={img._id} className="relative aspect-square rounded-2xl overflow-hidden group shadow-sm border border-slate-100 bg-slate-50">
-            <img src={img.thumbnailUrl || img.url} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="Property" />
-            <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <button 
-                type="button" 
-                onClick={() => handleDelete(img._id)} 
-                className="bg-white/20 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500 transition-colors"
-              >
-                <TrashIcon className="w-5 h-5" />
-              </button>
+      {/* Video Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+        <div className="space-y-4">
+          <label className="label">Option 1: YouTube / Vimeo URL</label>
+          <div className="relative group">
+            <input 
+              type="text" 
+              className="input pr-10 focus:ring-gold-500/20" 
+              placeholder="e.g. https://youtube.com/watch?v=..." 
+              {...register('videoUrl')} 
+            />
+            <VideoCameraIcon className="w-5 h-5 text-slate-300 absolute right-3 top-1/2 -translate-y-1/2 group-hover:text-gold-500 transition-colors" />
+          </div>
+          <p className="text-[10px] text-slate-400">Provide a link to a hosted video. This will be prioritized.</p>
+        </div>
+
+        <div className="space-y-4">
+          <label className="label">Option 2: Direct Video Upload</label>
+          <div className="relative group">
+            <input 
+              type="file" 
+              accept="video/*" 
+              onChange={onVideoUpload}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+              disabled={isUploadingVideo}
+            />
+            <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex items-center gap-3 ${isUploadingVideo ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200 group-hover:border-gold-500 group-hover:bg-gold-50/50'}`}>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isUploadingVideo ? 'bg-slate-100 text-slate-400' : 'bg-gold-50 text-gold-600'}`}>
+                {isUploadingVideo ? <div className="w-5 h-5 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" /> : <VideoCameraIcon className="w-6 h-6" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold text-navy-900 truncate">
+                  {isUploadingVideo ? 'Uploading...' : 'Upload Video File'}
+                </p>
+                <p className="text-[10px] text-slate-400">MP4, WebM up to 50MB</p>
+              </div>
             </div>
           </div>
-        ))}
-        {isUploading && (
-           <div className="aspect-square rounded-2xl border border-slate-100 bg-slate-50 flex flex-col items-center justify-center animate-pulse">
-             <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-             <span className="text-[10px] font-bold text-slate-400 uppercase">Uploading...</span>
-           </div>
-        )}
+          {videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('youtube') && !videoUrl.includes('vimeo') && (
+             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                <CheckIcon className="w-4 h-4" /> Video uploaded successfully
+             </div>
+          )}
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-slate-50">
+        <label className="label">Virtual Tour URL (3D Walkthrough)</label>
+        <input type="text" className="input" placeholder="e.g. Matterport or 360 viewer link" {...register('virtualTourUrl')} />
       </div>
     </div>
   );
@@ -660,17 +736,6 @@ function Step7Additional() {
         <div>
           <label className="label">RERA ID</label>
           <input type="text" className="input" placeholder="RERA registration number" {...register('reraNumber')} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="label">Video URL (YouTube/Vimeo)</label>
-          <input type="url" className="input" placeholder="https://..." {...register('videoUrl')} />
-        </div>
-        <div>
-          <label className="label">Virtual Tour URL</label>
-          <input type="url" className="input" placeholder="https://..." {...register('virtualTourUrl')} />
         </div>
       </div>
     </div>

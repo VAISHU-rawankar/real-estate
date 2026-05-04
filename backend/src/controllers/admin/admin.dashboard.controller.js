@@ -31,15 +31,16 @@ async function getLeadStats() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [total, todayCount, byStatus] = await Promise.all([
+  const [total, todayCount, byStatus, recent] = await Promise.all([
     Lead.countDocuments(),
     Lead.countDocuments({ createdAt: { $gte: today } }),
     Lead.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+    Lead.find().sort({ createdAt: -1 }).limit(10).populate('property', 'title slug').lean(),
   ]);
 
   const statusMap = byStatus.reduce((acc, s) => { acc[s._id] = s.count; return acc; }, {});
 
-  return { total, todayCount, byStatus: statusMap };
+  return { total, todayCount, byStatus: statusMap, recent };
 }
 
 /**

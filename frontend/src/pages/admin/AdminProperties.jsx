@@ -143,7 +143,7 @@ export default function AdminProperties() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-[13px] font-medium text-gray-500">{p.location?.city || '—'}</td>
+                        <td className="px-8 py-5 text-[13px] font-medium text-gray-500">{p?.location?.city || '—'}</td>
                         <td className="px-8 py-5 text-[14px] font-bold text-[#111111]">{formatPrice(p.price)}</td>
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-2 text-[13px] font-bold text-[#111111]">

@@ -95,15 +95,17 @@ export default function ProfilePage() {
     <>
       <Helmet><title>My Profile — RealEstate</title></Helmet>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-0 px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-[#7C5CFF]/10 rounded-xl flex items-center justify-center">
-            <UserCircleIcon className="w-5 h-5 text-[#7C5CFF]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#111111]">My Profile</h1>
-            <p className="text-sm text-gray-400">Manage your personal information</p>
+        <div className="mb-10">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-2xl flex items-center justify-center shadow-sm">
+              <UserCircleIcon className="w-6 h-6 text-[#7C5CFF]" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-semibold text-[#111111] tracking-tight">My Profile</h1>
+              <p className="text-[13px] text-gray-400 font-medium opacity-80 mt-1">Manage your personal information and account settings</p>
+            </div>
           </div>
         </div>
 
@@ -122,151 +124,151 @@ export default function ProfilePage() {
             {/* Profile Banner */}
             <div className="h-20 bg-gradient-to-r from-[#7C5CFF] to-[#A78BFA]" />
 
-            <div className="px-6 pb-6">
-              {/* Avatar */}
-              <div className="flex items-end justify-between -mt-10 mb-6">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-[#111111] border-4 border-white flex items-center justify-center shadow-lg">
-                    <span className="text-white text-2xl font-extrabold">{avatar}</span>
+              <div className="px-6 pb-6">
+                {/* Avatar */}
+                <div className="flex items-end justify-between -mt-10 mb-6 px-6">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full bg-[#111111] border-4 border-white flex items-center justify-center shadow-lg group/avatar">
+                      <span className="text-white text-2xl font-semibold">{avatar}</span>
+                    </div>
                   </div>
-                </div>
-                {!editing && (
-                  <button
-                    onClick={startEdit}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#111111] hover:bg-[#7C5CFF] text-white text-sm font-semibold rounded-full transition-colors"
-                  >
-                    <PencilSquareIcon className="w-4 h-4" />
-                    Edit Profile
-                  </button>
-                )}
-              </div>
-
-              {/* Name & Role */}
-              {!editing && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-[#111111]">{profile?.name}</h2>
-                  <span className="inline-block mt-1 px-2.5 py-0.5 bg-[#7C5CFF]/10 text-[#7C5CFF] text-xs font-bold rounded-full uppercase tracking-wider">
-                    {roleBadge}
-                  </span>
-                  {profile?.bio && (
-                    <p className="text-sm text-gray-500 mt-3 leading-relaxed">{profile.bio}</p>
+                  {!editing && (
+                    <button
+                      onClick={startEdit}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-[#111111] hover:bg-[#7C5CFF] text-white text-[11px] font-semibold rounded-2xl transition-all shadow-lg shadow-black/10 uppercase tracking-widest active:scale-95"
+                    >
+                      <PencilSquareIcon className="w-4 h-4" />
+                      Edit Profile
+                    </button>
                   )}
                 </div>
-              )}
 
-              {/* Success Message */}
-              {success && (
-                <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-xl text-sm font-medium mb-4">
-                  <CheckCircleIcon className="w-5 h-5" />
-                  Profile updated successfully!
-                </div>
-              )}
+                {/* Name & Role */}
+                {!editing && (
+                  <div className="mb-8 px-6">
+                    <h2 className="text-xl font-semibold text-[#111111] font-display tracking-tight">{profile?.name}</h2>
+                    <span className="inline-block mt-2 px-3 py-1 bg-[#7C5CFF]/10 text-[#7C5CFF] text-[10px] font-semibold rounded-lg uppercase tracking-[0.1em]">
+                      {roleBadge}
+                    </span>
+                    {profile?.bio && (
+                      <p className="text-sm text-gray-500 mt-4 leading-relaxed font-medium opacity-80">{profile.bio}</p>
+                    )}
+                  </div>
+                )}
 
-              {/* Error Message */}
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 text-red-600 rounded-xl text-sm font-medium mb-4">
-                  <XMarkIcon className="w-5 h-5" />
-                  {error}
-                </div>
-              )}
+                {/* Success Message */}
+                {success && (
+                  <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-700 rounded-2xl text-[13px] font-semibold mb-6 mx-6 border border-emerald-100">
+                    <CheckCircleIcon className="w-5 h-5" />
+                    Profile updated successfully!
+                  </div>
+                )}
 
-              {/* View Mode */}
-              {!editing && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Email</p>
-                    <p className="text-sm font-semibold text-[#111111] flex items-center gap-2">
-                      <EnvelopeIcon className="w-4 h-4 text-gray-400" />
-                      {profile?.email}
-                    </p>
+                {/* Error Message */}
+                {error && (
+                  <div className="flex items-center gap-2 p-4 bg-rose-50 text-rose-600 rounded-2xl text-[13px] font-semibold mb-6 mx-6 border border-rose-100">
+                    <XMarkIcon className="w-5 h-5" />
+                    {error}
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Phone</p>
-                    <p className="text-sm font-semibold text-[#111111] flex items-center gap-2">
-                      <PhoneIcon className="w-4 h-4 text-gray-400" />
-                      {profile?.phone || <span className="text-gray-400 italic">Not provided</span>}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">City</p>
-                    <p className="text-sm font-semibold text-[#111111]">
-                      {profile?.location?.city || <span className="text-gray-400 italic">Not provided</span>}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Member Since</p>
-                    <p className="text-sm font-semibold text-[#111111]">
-                      {new Date(profile?.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Edit Form */}
-              {editing && (
-                <form onSubmit={handleSave} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="Full Name"
-                      id="name"
-                      value={form.name}
-                      onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      icon={UserCircleIcon}
-                    />
-                    <InputField
-                      label="Email (cannot change)"
-                      id="email"
-                      value={profile?.email || ''}
-                      disabled
-                      icon={EnvelopeIcon}
-                    />
-                    <InputField
-                      label="Phone Number"
-                      id="phone"
-                      type="tel"
-                      value={form.phone}
-                      onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                      icon={PhoneIcon}
-                    />
-                    <InputField
-                      label="City"
-                      id="city"
-                      value={form.city}
-                      onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                    />
+                {/* View Mode */}
+                {!editing && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6">
+                    <div className="p-5 bg-gray-50/50 rounded-2xl border border-gray-50">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-2">Email Address</p>
+                      <p className="text-[13px] font-semibold text-[#111111] flex items-center gap-2.5">
+                        <EnvelopeIcon className="w-4 h-4 text-[#7C5CFF]" />
+                        {profile?.email}
+                      </p>
+                    </div>
+                    <div className="p-5 bg-gray-50/50 rounded-2xl border border-gray-50">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-2">Phone Number</p>
+                      <p className="text-[13px] font-semibold text-[#111111] flex items-center gap-2.5">
+                        <PhoneIcon className="w-4 h-4 text-[#7C5CFF]" />
+                        {profile?.phone || <span className="text-gray-400 italic">Not provided</span>}
+                      </p>
+                    </div>
+                    <div className="p-5 bg-gray-50/50 rounded-2xl border border-gray-50">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-2">City</p>
+                      <p className="text-[13px] font-semibold text-[#111111]">
+                        {profile?.location?.city || <span className="text-gray-400 italic">Not provided</span>}
+                      </p>
+                    </div>
+                    <div className="p-5 bg-gray-50/50 rounded-2xl border border-gray-50">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-2">Member Since</p>
+                      <p className="text-[13px] font-semibold text-[#111111]">
+                        {new Date(profile?.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Bio</label>
-                    <textarea
-                      value={form.bio}
-                      onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                      rows={3}
-                      placeholder="Tell us a little about yourself..."
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-[#7C5CFF] focus:ring-2 focus:ring-[#7C5CFF]/10 resize-none transition-all"
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="flex-1 py-3 bg-[#111111] hover:bg-[#7C5CFF] text-white font-bold rounded-xl transition-colors disabled:opacity-50"
-                    >
-                      {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setEditing(false); setError(''); }}
-                      className="px-6 py-3 border border-gray-200 text-gray-600 hover:border-gray-300 font-semibold rounded-xl transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
+                )}
+
+                {/* Edit Form */}
+                {editing && (
+                  <form onSubmit={handleSave} className="space-y-6 px-6 pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <InputField
+                        label="Full Name"
+                        id="name"
+                        value={form.name}
+                        onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                        icon={UserCircleIcon}
+                      />
+                      <InputField
+                        label="Email (cannot change)"
+                        id="email"
+                        value={profile?.email || ''}
+                        disabled
+                        icon={EnvelopeIcon}
+                      />
+                      <InputField
+                        label="Phone Number"
+                        id="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                        icon={PhoneIcon}
+                      />
+                      <InputField
+                        label="City"
+                        id="city"
+                        value={form.city}
+                        onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-[0.1em]">Bio</label>
+                      <textarea
+                        value={form.bio}
+                        onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
+                        rows={4}
+                        placeholder="Tell us a little about yourself..."
+                        className="w-full px-5 py-4 rounded-2xl border border-gray-200 text-sm font-semibold outline-none focus:border-[#7C5CFF] focus:ring-4 focus:ring-[#7C5CFF]/5 resize-none transition-all placeholder:font-medium"
+                      />
+                    </div>
+                    <div className="flex gap-4 pt-4">
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="flex-1 py-4 bg-[#111111] hover:bg-[#7C5CFF] text-white font-semibold rounded-2xl transition-all shadow-xl shadow-black/10 uppercase text-[11px] tracking-widest disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditing(false); setError(''); }}
+                        className="px-10 py-4 border border-gray-200 text-[#111111] hover:bg-gray-50 font-semibold rounded-2xl transition-all uppercase text-[11px] tracking-widest"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
+          )}
+        </div>
+      </>
+    );
+  }

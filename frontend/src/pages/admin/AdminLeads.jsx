@@ -38,8 +38,8 @@ export default function AdminLeads() {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-[28px] font-bold text-[#111111]">Leads Management</h1>
-            <p className="text-[14px] text-gray-400 font-medium mt-1">Manage and track your customer inquiries across all properties.</p>
+            <h1 className="text-[28px] font-bold text-[#111111]">Property Enquiries</h1>
+            <p className="text-[14px] text-gray-400 font-medium mt-1">Manage and track all customer inquiries submitted across your properties.</p>
           </div>
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 bg-white border border-gray-200 text-[#111111] px-5 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm">

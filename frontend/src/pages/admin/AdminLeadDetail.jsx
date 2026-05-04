@@ -147,14 +147,14 @@ export default function AdminLeadDetail() {
                 <div className="relative aspect-video">
                   <img src={lead.property.images?.[0]?.url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400'} className="w-full h-full object-cover" alt="" />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[11px] font-bold text-[#111111]">
-                    ₹{lead.property.price >= 10000000 ? (lead.property.price / 10000000).toFixed(2) + ' Cr' : (lead.property.price / 100000).toFixed(1) + ' L'}
+                    ₹{lead.property?.price >= 10000000 ? (lead.property?.price / 10000000).toFixed(2) + ' Cr' : (lead.property?.price / 100000).toFixed(1) + ' L'}
                   </div>
                 </div>
                 <div className="p-6 space-y-4">
-                  <h4 className="text-[15px] font-bold text-[#111111] line-clamp-1">{lead.property.title}</h4>
+                  <h4 className="text-[15px] font-bold text-[#111111] line-clamp-1">{lead.property?.title}</h4>
                   <div className="flex items-center gap-2 text-[13px] text-gray-500">
                     <BuildingOfficeIcon className="w-4 h-4" />
-                    <span>{lead.property.location?.city}</span>
+                    <span>{lead.property?.location?.city || 'Global'}</span>
                   </div>
                   <Link to={`/properties/${lead.property.slug}`} target="_blank" className="block w-full py-3 bg-gray-50 text-[#111111] text-center text-sm font-bold rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors">
                     View Property Details

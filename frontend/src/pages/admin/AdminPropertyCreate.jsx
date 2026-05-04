@@ -7,12 +7,13 @@ import { useDropzone } from 'react-dropzone';
 import { 
   BuildingOfficeIcon, MapPinIcon, DocumentTextIcon, BanknotesIcon, 
   SparklesIcon, PhotoIcon, PlusIcon, CheckIcon, ArrowLeftIcon, ArrowRightIcon,
-  TrashIcon, InformationCircleIcon
+  TrashIcon, InformationCircleIcon, VideoCameraIcon
 } from '@heroicons/react/24/outline';
 import { 
   useCreatePropertyMutation, 
   useUpdatePropertyMutation, 
-  useUploadPropertyImagesMutation 
+  useUploadPropertyImagesMutation,
+  useUploadPropertyVideoMutation 
 } from '@store/api/propertyApi';
 import { useDispatch } from 'react-redux';
 import { showToast } from '@store/slices/uiSlice';
@@ -39,6 +40,7 @@ export default function AdminPropertyCreate() {
   const [createProperty, { isLoading: isCreating }] = useCreatePropertyMutation();
   const [updateProperty, { isLoading: isUpdating }] = useUpdatePropertyMutation();
   const [uploadImages, { isLoading: isUploading }] = useUploadPropertyImagesMutation();
+  const [uploadVideo, { isLoading: isUploadingVideo }] = useUploadPropertyVideoMutation();
 
   const methods = useForm({
     defaultValues: {
@@ -137,7 +139,7 @@ export default function AdminPropertyCreate() {
     <>
       <Helmet><title>Create New Listing — Admin</title></Helmet>
 
-      <div className="max-w-4xl mx-auto space-y-8 pb-16">
+      <div className="max-w-6xl space-y-8 pb-16">
         <div>
           <h1 className="text-2xl font-display font-bold text-navy-900">Create New Listing</h1>
           <p className="text-slate-400 text-sm mt-1">Fill out the information below to add a property.</p>
@@ -150,12 +152,34 @@ export default function AdminPropertyCreate() {
             const isActive = step.id === currentStep;
             const isCompleted = step.id < currentStep;
             return (
-              <div key={step.id} className="flex flex-col items-center gap-1 flex-1 relative last:after:hidden after:content-[''] after:h-[2px] after:bg-slate-100 after:w-full after:absolute after:top-5 after:left-1/2 after:-z-10">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gold-gradient text-white shadow-md' : isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+              <button
+                key={step.id}
+                type="button"
+                onClick={async () => {
+                  if (step.id < currentStep) {
+                    setCurrentStep(step.id);
+                    saveDraftLocally(step.id);
+                  } else if (step.id > currentStep) {
+                    // Try to go forward only if current step is valid
+                    let fieldsToValidate = [];
+                    if (currentStep === 1) fieldsToValidate = ['title', 'propertyType', 'propertySubType', 'listingType'];
+                    if (currentStep === 2) fieldsToValidate = ['location.address', 'location.city', 'location.state', 'location.pincode', 'location.locality'];
+                    if (currentStep === 4) fieldsToValidate = ['price'];
+                    
+                    const isValid = await trigger(fieldsToValidate);
+                    if (isValid) {
+                      setCurrentStep(step.id);
+                      saveDraftLocally(step.id);
+                    }
+                  }
+                }}
+                className="flex flex-col items-center gap-1 flex-1 relative last:after:hidden after:content-[''] after:h-[2px] after:bg-slate-100 after:w-full after:absolute after:top-5 after:left-1/2 after:-z-10 group"
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gold-gradient text-white shadow-md' : isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-navy-900'}`}>
                   {isCompleted ? <CheckIcon className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                 </div>
-                <span className={`text-xs font-medium ${isActive ? 'text-navy-900 font-semibold' : 'text-slate-400'}`}>{step.name}</span>
-              </div>
+                <span className={`text-[10px] uppercase tracking-wider font-bold ${isActive ? 'text-navy-900 font-bold' : 'text-slate-400 group-hover:text-navy-700 transition-colors'}`}>{step.name}</span>
+              </button>
             );
           })}
         </div>
@@ -183,7 +207,7 @@ export default function AdminPropertyCreate() {
                   {currentStep === 3 && <Step3Details />}
                   {currentStep === 4 && <Step4Pricing />}
                   {currentStep === 5 && <Step5Amenities />}
-                  {currentStep === 6 && <Step6Media propertyId={propertyId} setUploadedImages={setUploadedImages} uploadedImages={uploadedImages} uploadImagesMutation={uploadImages} isUploading={isUploading} />}
+                  {currentStep === 6 && <Step6Media propertyId={propertyId} setUploadedImages={setUploadedImages} uploadedImages={uploadedImages} uploadImagesMutation={uploadImages} isUploading={isUploading} uploadVideoMutation={uploadVideo} isUploadingVideo={isUploadingVideo} />}
                   {currentStep === 7 && <Step7Additional />}
                   {currentStep === 8 && <Step8Preview propertyId={propertyId} />}
                 </motion.div>
@@ -489,11 +513,12 @@ function Step5Amenities() {
   );
 }
 
-function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImagesMutation, isUploading }) {
-  const { register } = useFormContext();
+function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImagesMutation, isUploading, uploadVideoMutation, isUploadingVideo }) {
+  const { register, setValue, watch } = useFormContext();
   const dispatch = useDispatch();
+  const videoUrl = watch('videoUrl');
 
-  const onDrop = async (acceptedFiles) => {
+  const onDropImages = async (acceptedFiles) => {
     if (!propertyId) {
       dispatch(showToast({ type: 'warning', message: 'Initialize draft first before media upload' }));
       return;
@@ -511,41 +536,106 @@ function Step6Media({ propertyId, uploadedImages, setUploadedImages, uploadImage
     }
   };
 
+  const onVideoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!propertyId) {
+      dispatch(showToast({ type: 'warning', message: 'Initialize draft first before video upload' }));
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('video', file);
+
+    try {
+      const response = await uploadVideoMutation({ id: propertyId, formData }).unwrap();
+      setValue('videoUrl', response.data.url, { shouldDirty: true });
+      dispatch(showToast({ type: 'success', message: 'Video uploaded successfully!' }));
+    } catch (e) {
+      dispatch(showToast({ type: 'error', message: 'Video upload failed.' }));
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop, accept: { 'image/*': [] }, maxFiles: 30
+    onDrop: onDropImages, accept: { 'image/*': [] }, maxFiles: 30
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <h3 className="text-lg font-display font-bold text-navy-900 border-b pb-2">Step 6: Media Upload</h3>
 
-      <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all ${isDragActive ? 'border-gold-500 bg-gold-50/20' : 'border-slate-200 hover:border-slate-300'}`}>
-        <input {...getInputProps()} />
-        <PhotoIcon className="w-12 h-12 text-slate-300 mb-3" />
-        <p className="text-sm font-medium text-slate-700">Drag & drop files here, or click to browse</p>
-        <p className="text-xs text-slate-400 mt-1">PNG, JPEG, WebP up to 10MB each (Max 30 images)</p>
-        {isUploading && <p className="text-gold-600 font-semibold text-sm mt-4 animate-pulse">Uploading...</p>}
+      {/* Image Upload Area */}
+      <div className="space-y-4">
+        <label className="label">Property Photos</label>
+        <div {...getRootProps()} className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all ${isDragActive ? 'border-gold-500 bg-gold-50/20' : 'border-slate-200 hover:border-slate-300'}`}>
+          <input {...getInputProps()} />
+          <PhotoIcon className="w-12 h-12 text-slate-300 mb-3" />
+          <p className="text-sm font-medium text-slate-700">Drag & drop images here, or click to browse</p>
+          <p className="text-xs text-slate-400 mt-1">PNG, JPEG, WebP up to 10MB each (Max 30 images)</p>
+          {isUploading && <p className="text-gold-600 font-semibold text-sm mt-4 animate-pulse">Uploading images...</p>}
+        </div>
+
+        {uploadedImages.length > 0 && (
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+            {uploadedImages.map((img, i) => (
+              <div key={i} className="relative aspect-square rounded-xl overflow-hidden group border border-slate-100">
+                <img src={img.thumbnailUrl || img.url} alt="Uploaded" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {uploadedImages.length > 0 && (
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-          {uploadedImages.map((img, i) => (
-            <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
-              <img src={img.thumbnailUrl || img.url} alt="Uploaded" className="w-full h-full object-cover" />
-            </div>
-          ))}
+      {/* Video Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-slate-50">
+        <div className="space-y-4">
+          <label className="label">Option 1: YouTube / Vimeo Link</label>
+          <div className="relative">
+            <input 
+              type="text" 
+              className="input pr-10" 
+              placeholder="e.g. https://youtube.com/watch?v=..." 
+              {...register('videoUrl')} 
+            />
+            <VideoCameraIcon className="w-5 h-5 text-slate-300 absolute right-3 top-1/2 -translate-y-1/2" />
+          </div>
+          <p className="text-[10px] text-slate-400">Provide a link to a hosted video. This will be prioritized.</p>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-        <div>
-          <label className="label">YouTube / Vimeo Video URL</label>
-          <input type="text" className="input" placeholder="e.g. https://youtube.com/watch?v=..." {...register('videoUrl')} />
+        <div className="space-y-4">
+          <label className="label">Option 2: Direct Video Upload</label>
+          <div className="relative group">
+            <input 
+              type="file" 
+              accept="video/*" 
+              onChange={onVideoUpload}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+              disabled={isUploadingVideo}
+            />
+            <div className={`p-4 rounded-xl border-2 border-dashed transition-all flex items-center gap-3 ${isUploadingVideo ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200 group-hover:border-[#7C5CFF] group-hover:bg-[#7C5CFF]/5'}`}>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isUploadingVideo ? 'bg-slate-100 text-slate-400' : 'bg-[#7C5CFF]/10 text-[#7C5CFF]'}`}>
+                {isUploadingVideo ? <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin" /> : <VideoCameraIcon className="w-6 h-6" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold text-navy-900 truncate">
+                  {isUploadingVideo ? 'Uploading...' : 'Choose video file'}
+                </p>
+                <p className="text-[10px] text-slate-400">MP4, WebM up to 50MB</p>
+              </div>
+            </div>
+          </div>
+          {videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('youtube') && !videoUrl.includes('vimeo') && (
+             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg text-xs font-semibold">
+                <CheckIcon className="w-4 h-4" /> Video uploaded successfully
+             </div>
+          )}
         </div>
-        <div>
-          <label className="label">Virtual Tour URL</label>
-          <input type="text" className="input" placeholder="3D walkthrough link" {...register('virtualTourUrl')} />
-        </div>
+      </div>
+
+      <div className="pt-4 border-t border-slate-50">
+        <label className="label">Virtual Tour URL (3D Walkthrough)</label>
+        <input type="text" className="input" placeholder="e.g. Matterport or 360 viewer link" {...register('virtualTourUrl')} />
       </div>
     </div>
   );

@@ -111,21 +111,21 @@ export default function SearchAlertsPage() {
     <>
       <Helmet><title>Search Alerts — RealEstate</title></Helmet>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-0 px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#7C5CFF]/10 rounded-xl flex items-center justify-center">
-              <BellIcon className="w-5 h-5 text-[#7C5CFF]" />
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-2xl flex items-center justify-center shadow-sm">
+              <BellIcon className="w-6 h-6 text-[#7C5CFF]" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-[#111111]">Search Alerts</h1>
-              <p className="text-sm text-gray-400">{alerts.length} active alert{alerts.length !== 1 ? 's' : ''}</p>
+              <h1 className="text-2xl md:text-3xl font-display font-semibold text-[#111111] tracking-tight">Search Alerts</h1>
+              <p className="text-[13px] text-gray-400 font-medium opacity-80 mt-1">{alerts.length} active property alert{alerts.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
           <button
             onClick={() => { setShowForm(!showForm); setFormError(''); }}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#111111] hover:bg-[#7C5CFF] text-white text-sm font-semibold rounded-full transition-colors"
+            className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#111111] hover:bg-[#7C5CFF] text-white text-[11px] font-semibold rounded-2xl transition-all shadow-xl shadow-black/10 uppercase tracking-widest active:scale-95"
           >
             {showForm ? <XMarkIcon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
             {showForm ? 'Cancel' : 'New Alert'}

@@ -6,7 +6,7 @@ const propertyCtrl = require('../controllers/admin/admin.property.controller');
 const dashboardCtrl = require('../controllers/admin/admin.dashboard.controller');
 const leadCtrl = require('../controllers/admin/admin.lead.controller');
 const cmsCtrl = require('../controllers/admin/cms.controller');
-const { uploadMultiple } = require('../middleware/upload.middleware');
+const { uploadMultiple, uploadVideo } = require('../middleware/upload.middleware');
 const { logAdminAction } = require('../middleware/admin.middleware');
 // Dashboard
 router.get('/dashboard/stats', dashboardCtrl.getDashboardStats);
@@ -22,6 +22,7 @@ router.delete('/properties/:id', logAdminAction('Deleted property', 'property'),
 router.patch('/properties/:id/status', logAdminAction('Updated property status', 'property'), propertyCtrl.updatePropertyStatus);
 router.patch('/properties/:id/featured', logAdminAction('Toggled featured', 'property'), propertyCtrl.toggleFeatured);
 router.post('/properties/:id/images', uploadMultiple, propertyCtrl.uploadPropertyImages);
+router.post('/properties/:id/video', uploadVideo, propertyCtrl.uploadPropertyVideo);
 router.delete('/properties/:id/images/:imageId', propertyCtrl.deletePropertyImage);
 router.patch('/properties/:id/images/reorder', propertyCtrl.reorderImages);
 

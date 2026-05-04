@@ -5,7 +5,13 @@ import { useSelector } from 'react-redux';
 import { useGetPropertyBySlugQuery, useGetRelatedPropertiesQuery } from '@store/api/propertyApi';
 import { useCreateEnquiryMutation } from '@store/api/leadApi';
 import { selectCurrentUser } from '@store/slices/authSlice';
-import { MapPinIcon, ArrowLeftIcon, PhoneIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, ArrowLeftIcon, PhoneIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, XMarkIcon, HeartIcon as HeartOutline } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
+import { useDispatch } from 'react-redux';
+import { addToShortlist as localAdd, removeFromShortlist as localRemove, selectIsShortlisted } from '@store/slices/shortlistSlice';
+import { showToast } from '@store/slices/uiSlice';
+import { selectIsAuthenticated } from '@store/slices/authSlice';
+import { useAddToShortlistMutation, useRemoveFromShortlistMutation } from '@store/api/userApi';
 import LoadingPage from '@components/common/LoadingPage';
 import PropertyCard from '@components/property/PropertyCard';
 
@@ -18,10 +24,45 @@ function formatPrice(price) {
 
 export default function PropertyDetailPage() {
   const { slug } = useParams();
+  const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const { data, isLoading, error } = useGetPropertyBySlugQuery(slug);
   const { data: relatedData } = useGetRelatedPropertiesQuery(slug);
+  const property = data?.data;
+  const isShortlisted = useSelector(selectIsShortlisted(property?._id));
+  
   const [createEnquiry, { isLoading: isSubmitting }] = useCreateEnquiryMutation();
+  const [apiAdd, { isLoading: isAddingShortlist }] = useAddToShortlistMutation();
+  const [apiRemove, { isLoading: isRemovingShortlist }] = useRemoveFromShortlistMutation();
+
+  const handleShortlist = async () => {
+    if (!property?._id) return;
+    
+    if (isAuthenticated) {
+      try {
+        if (isShortlisted) {
+          await apiRemove(property._id).unwrap();
+          dispatch(localRemove(property._id));
+          dispatch(showToast({ type: 'info', message: 'Removed from shortlist' }));
+        } else {
+          await apiAdd(property._id).unwrap();
+          dispatch(localAdd(property._id));
+          dispatch(showToast({ type: 'success', message: 'Saved to shortlist!' }));
+        }
+      } catch (err) {
+        dispatch(showToast({ type: 'error', message: 'Failed to update shortlist' }));
+      }
+    } else {
+      if (isShortlisted) {
+        dispatch(localRemove(property._id));
+        dispatch(showToast({ type: 'info', message: 'Removed from shortlist' }));
+      } else {
+        dispatch(localAdd(property._id));
+        dispatch(showToast({ type: 'success', message: 'Added to local shortlist!' }));
+      }
+    }
+  };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [form, setForm] = useState({
@@ -59,7 +100,6 @@ export default function PropertyDetailPage() {
     </div>
   );
 
-  const property = data?.data;
   const related = relatedData?.data || [];
   const images = property?.images || [{ url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200' }];
   const primaryImage = images[currentImageIndex]?.url || images[0]?.url;
@@ -107,8 +147,21 @@ export default function PropertyDetailPage() {
             {/* Property Overview */}
             <div className="bg-[#FAF8F5]/30 border border-[#EAE6DF] rounded-[32px] p-6 md:p-10 text-[#1A1A1A]">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#EAE6DF] pb-6 mb-6">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight">{property?.title}</h1>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-4">
+                    <h1 className="text-2xl md:text-3xl font-display font-semibold tracking-tight">{property?.title}</h1>
+                    <button 
+                      onClick={handleShortlist}
+                      disabled={isAddingShortlist || isRemovingShortlist}
+                      className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 border ${
+                        isShortlisted 
+                          ? 'bg-rose-50 border-rose-100 text-rose-500' 
+                          : 'bg-white border-gray-100 text-gray-400 hover:text-rose-500 hover:bg-rose-50/50'
+                      }`}
+                    >
+                      {isShortlisted ? <HeartSolid className="w-6 h-6" /> : <HeartOutline className="w-6 h-6" />}
+                    </button>
+                  </div>
                   <div className="flex items-center gap-1.5 text-gray-500 text-xs mt-2 font-medium">
                     <MapPinIcon className="w-4 h-4" />
                     <span>{property?.location?.locality}, {property?.location?.city}, {property?.location?.state}</span>
@@ -267,9 +320,23 @@ export default function PropertyDetailPage() {
                   <button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="w-full bg-[#7C5CFF] hover:bg-[#6D28D9] text-white text-xs font-bold py-3 rounded-full transition-all duration-300 shadow-md shadow-[#7C5CFF]/20 mt-2 disabled:opacity-50"
+                    className="w-full bg-[#7C5CFF] hover:bg-[#6D28D9] text-white text-xs font-bold py-3.5 rounded-full transition-all duration-300 shadow-md shadow-[#7C5CFF]/20 mt-2 disabled:opacity-50"
                   >
                     {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={handleShortlist}
+                    disabled={isAddingShortlist || isRemovingShortlist}
+                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-xs font-bold transition-all duration-300 border ${
+                      isShortlisted 
+                        ? 'bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-500/20' 
+                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {isShortlisted ? <HeartSolid className="w-4 h-4" /> : <HeartOutline className="w-4 h-4" />}
+                    {isShortlisted ? 'Saved to Shortlist' : 'Add to Shortlist'}
                   </button>
                 </form>
               )}
